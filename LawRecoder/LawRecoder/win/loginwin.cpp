@@ -85,6 +85,7 @@ void LoginWin::BtnClicked()
 {
     QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
 
+    //传账号，密码，用户输入的验证码，验证码
     if (clickedButton == btnOk) {
         QString userId = editUserId->text();
         QString password = editPwd->text();

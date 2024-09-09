@@ -9,11 +9,21 @@ class LoginController:public QObject
     SINGLETON(LoginController)
     Q_OBJECT
 signals:
-        void LoginCheckSignals(const QString& userId, const QString& password, const QString& inputVerificationCode, const QString& generatedVerificationCode);
+        void LoginCheckSignals(const QString& userAccount, const QString& userPassword, const QString& inputVerificationCode, const QString& generatedVerificationCode);
+        void startedLoginSignal();
+
 public:
+    void initController();
+
+    int getLoginFlag() const;
+    void setLoginFlag(int flag);
 
 public slots:
-        void LoginCheckSlots(const QString& userId, const QString& password, const QString& inputVerificationCode, const QString& generatedVerificationCode);
+        void LoginCheckSlots(const QString& userAccount, const QString& userPassword, const QString& inputVerificationCode, const QString& generatedVerificationCode);
+private:
+        int loginflag;
+private slots:
+        void startLoginSlot();
 };
 
 #endif // LOGINCONTROLLER_H
