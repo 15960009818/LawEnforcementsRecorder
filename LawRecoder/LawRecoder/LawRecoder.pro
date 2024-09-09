@@ -28,13 +28,15 @@ SOURCES += \
         main.cpp \
         widget.cpp \
     common/verificationcodelabel.cpp \
-    common/sqlite3crud.cpp
+    common/sqlite3crud.cpp \
+    win/loginwin.cpp
 
 HEADERS += \
         widget.h \
     common/verificationcodelabel.h \
     common/singleton.h \
-    common/sqlite3crud.h
+    common/sqlite3crud.h \
+    win/loginwin.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
