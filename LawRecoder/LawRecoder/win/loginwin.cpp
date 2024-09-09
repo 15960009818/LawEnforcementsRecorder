@@ -67,3 +67,38 @@ void LoginWin::setUi(){
 
         setLayout(mainLayout);
 }
+/**
+ * @brief LoginWin::connectSignals 统一管理按钮信号
+ */
+void LoginWin::connectSignals()
+{
+
+    connect(btnOk, &QPushButton::clicked, this, &LoginWin::BtnClicked);
+    connect(btnReset, &QPushButton::clicked, this, &LoginWin::BtnClicked);
+    connect(btnCancel, &QPushButton::clicked, this, &LoginWin::BtnClicked);
+}
+
+/**
+ * @brief LoginWin::BtnClicked 确认登录按钮功能
+ */
+void LoginWin::BtnClicked()
+{
+    QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
+
+    if (clickedButton == btnOk) {
+        QString userId = editUserId->text();
+        QString password = editPwd->text();
+        QString inputVerificationCode = editVfcd->text();
+        QString generatedVerificationCode = labVerificationCode->getVerificationCode();  // 假设有此方法获取生成的验证码
+    emit Singleton<LoginController>::getInstance().LoginCheckSignals(userId, password, inputVerificationCode, generatedVerificationCode);
+
+
+    } else if (clickedButton == btnReset) {
+        editUserId->clear();
+        editPwd->clear();
+        editVfcd->clear();
+
+    } else if (clickedButton == btnCancel) {
+        close();
+    }
+}

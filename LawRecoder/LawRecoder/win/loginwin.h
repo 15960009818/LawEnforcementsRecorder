@@ -9,7 +9,7 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include "../common/verificationcodelabel.h"  // 假设这个类在项目中定义
-
+#include "../controller/logincontroller.h"
 class LoginWin : public QWidget
 {
     Q_OBJECT
@@ -19,16 +19,11 @@ public:
     // 设置UI界面
     void setUi();
 
-//private slots:
-//    // 加载页面前传输信号
-//    void showUiSlot();
-//    // 返回登录验证结果信号
-//    void showFinishedLoginCheckResultUISlot();
-//    // 按钮传输的信号
-//    void showButtonUISlot();
-//    // 显示或隐藏密码
-//    void togglePasswordVisibility();
 
+
+    void connectSignals();
+private slots:
+    void BtnClicked();
 private:
     QLabel *labTitle;
     QLabel *labDvid;
