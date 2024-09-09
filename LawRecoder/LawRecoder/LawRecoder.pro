@@ -30,7 +30,8 @@ SOURCES += \
     common/verificationcodelabel.cpp \
     common/sqlite3crud.cpp \
     win/loginwin.cpp \
-    controller/logincontroller.cpp
+    controller/logincontroller.cpp \
+    service/loginservice.cpp
 
 HEADERS += \
         widget.h \
@@ -38,7 +39,8 @@ HEADERS += \
     common/singleton.h \
     common/sqlite3crud.h \
     win/loginwin.h \
-    controller/logincontroller.h
+    controller/logincontroller.h \
+    service/loginservice.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
