@@ -3,6 +3,7 @@
 LoginWin::LoginWin(QWidget *parent)
 {
     setUi();
+    connectSignals();
 }
 
 void LoginWin::setUi(){
@@ -72,14 +73,17 @@ void LoginWin::setUi(){
  */
 void LoginWin::connectSignals()
 {
-
+    qDebug() << "[DEBUG] btnOk exists:" << btnOk;
+       qDebug() << "[DEBUG] btnReset exists:" << btnReset;
+       qDebug() << "[DEBUG] btnCancel exists:" << btnCancel;
     connect(btnOk, &QPushButton::clicked, this, &LoginWin::BtnClicked);
     connect(btnReset, &QPushButton::clicked, this, &LoginWin::BtnClicked);
     connect(btnCancel, &QPushButton::clicked, this, &LoginWin::BtnClicked);
+
 }
 
 /**
- * @brief LoginWin::BtnClicked 确认登录按钮功能
+ * @brief LoginWin::BtnClicked 确认登录按钮功能槽
  */
 void LoginWin::BtnClicked()
 {
@@ -87,19 +91,27 @@ void LoginWin::BtnClicked()
 
     //传账号，密码，用户输入的验证码，验证码
     if (clickedButton == btnOk) {
+        //用户账号
         QString userId = editUserId->text();
         QString password = editPwd->text();
         QString inputVerificationCode = editVfcd->text();
-        QString generatedVerificationCode = labVerificationCode->getVerificationCode();  // 假设有此方法获取生成的验证码
-    emit Singleton<LoginController>::getInstance().LoginCheckSignals(userId, password, inputVerificationCode, generatedVerificationCode);
+        QString generatedVerificationCode = labVerificationCode->getVerificationCode();
+        qDebug() << "[DEBUG] User ID:" << userId;
+        qDebug() << "[DEBUG] Password:" << password;
+        qDebug() << "[DEBUG] Input Verification Code:" << inputVerificationCode;
+        qDebug() << "[DEBUG] Generated Verification Code:" << generatedVerificationCode;
 
+        emit Singleton<LoginController>::getInstance().LoginCheckSignals(userId, password, inputVerificationCode, generatedVerificationCode);
 
     } else if (clickedButton == btnReset) {
         editUserId->clear();
         editPwd->clear();
         editVfcd->clear();
 
+        qDebug() << "[DEBUG] Input fields reset.";
+
     } else if (clickedButton == btnCancel) {
+        qDebug() << "[DEBUG] Login canceled.";
         close();
     }
 }

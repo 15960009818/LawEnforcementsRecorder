@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    LawRecoder
+    LawRecoder \
+    Law_test

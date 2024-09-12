@@ -2,7 +2,7 @@
 #define LOGINSERVICE_H
 
 #include <QObject>
-
+#include "../common/singleton.h"
 class LoginService :public QObject
 {
     Q_OBJECT

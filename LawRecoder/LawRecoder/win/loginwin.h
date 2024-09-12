@@ -18,9 +18,6 @@ public:
 
     // 设置UI界面
     void setUi();
-
-
-
     void connectSignals();
 private slots:
     void BtnClicked();

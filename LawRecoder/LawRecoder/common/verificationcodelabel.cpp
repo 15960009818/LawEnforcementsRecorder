@@ -70,7 +70,6 @@ QChar VerificationCodeLabel::produceRandomLetter() const
     case LOWLETTER_FLAG:c='a' + qrand() % 26; break;
     default:c=qrand() % 2 ? 'W' : 'D';
     }
-     qDebug()<<"验证码c："<<c<<endl;
     return c;
 }
 //产生随机的颜色
