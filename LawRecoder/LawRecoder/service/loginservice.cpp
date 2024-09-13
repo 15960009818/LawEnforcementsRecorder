@@ -12,16 +12,30 @@ LoginService::LoginService(QObject *parent) : QObject(parent)
 
 void LoginService::GetLoginCheckSlots(const QString &userAccount, const QString &userPassword)
 {
-    sqlite3 *db;
+    sqlite3 *db=nullptr;
     sqlite3_stmt *stmt;
     int rc;
 
-    // 打开数据库
-    rc = sqlite3_open("data/video.db", &db);
-    if (rc) {
-        qDebug() << "[DEBUG] Can't open database:" << sqlite3_errmsg(db);
-        emit Singleton<LoginController>::getInstance().finishedLoginControllerSignal(SQLERROR); // 数据库打开失败
-        return;
+    //打开数据库
+
+    int res = sqlite3_open("data/video.db", &db);
+
+    if(res == 0)//打开成功
+
+    {
+
+    qDebug()<<"open dataBase success!"<<endl;
+
+    }
+
+    else
+
+    {
+
+    qDebug()<<sqlite3_errcode(db)<<endl;
+
+    qDebug()<<sqlite3_errmsg(db)<<endl;
+
     }
 
     // 准备 SQL 查询语句
@@ -77,7 +91,8 @@ void LoginService::GetLoginCheckSlots(const QString &userAccount, const QString 
         sqlite3_finalize(update_stmt);
     } else {
         qDebug() << "[DEBUG] Login failed: incorrect account or password.";
-        emit Singleton<LoginController>::getInstance().finishedLoginControllerSignal(SQLERROR);
+        emit Singleton<LoginController>::getInstance().finishedLoginControllerSignal(LOGINERROR);
+        qDebug() << "[DEBUG] Emitting finishedLoginControllerSignal with value:" << LOGINERROR;
     }
 
     // 释放查询语句资源

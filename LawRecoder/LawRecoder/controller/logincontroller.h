@@ -14,8 +14,8 @@ class LoginController:public QObject
 signals:
         void LoginCheckSignals(const QString& userAccount, const QString& userPassword, const QString& inputVerificationCode, const QString& generatedVerificationCode);
         void startedLoginSignal();
-        void finishedLoginControllerSignal(const int messageflag);
         void finishedLoginUISignal(const QString &uiMessage);
+        void finishedLoginControllerSignal(const int messageflag);
 public:
     void initController();
 

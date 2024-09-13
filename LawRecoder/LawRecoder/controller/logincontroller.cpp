@@ -29,6 +29,10 @@ void LoginController::initController()
     connect(this, SIGNAL(startedLoginSignal()), this, SLOT(startLoginSlot()));
     connect(this, SIGNAL(LoginCheckSignals(const QString&, const QString&, const QString&, const QString&)),
                this, SLOT(LoginCheckSlots(const QString&, const QString&, const QString&, const QString&)));
+    connect(this, SIGNAL(finishedLoginControllerSignal(int)),
+                this, SLOT(finishedLoginControllerThreadSlot(int)), Qt::QueuedConnection);//不指定Qt::QueuedConnection会接收不到
+
+
 }
 
 /**
@@ -60,6 +64,7 @@ void LoginController::LoginCheckSlots(const QString &userAccount, const QString 
         return;
     }
 
+
     // 对密码进行 MD5 加密
     QString encryptedPassword = QString(QCryptographicHash::hash(userPassword.toUtf8(), QCryptographicHash::Md5).toHex());
     qDebug() << "[DEBUG] Encrypted password (MD5):" << encryptedPassword;
@@ -79,13 +84,13 @@ void LoginController::LoginCheckSlots(const QString &userAccount, const QString 
     // 线程完成时销毁,先销毁线程再发送ui防止卡死
     connect(threadLoginCheck,SIGNAL(finished()),threadLoginCheck,SLOT(deleteLater()));
     connect(threadLoginCheck, &QThread::finished, loginService, &QObject::deleteLater);
-
+//    connect(this, SIGNAL(finishedLoginControllerSignal(int)),
+//                this, SLOT(finishedLoginControllerThreadSlot(int)), Qt::QueuedConnection);//不指定Qt::QueuedConnection会接收不到
 
     // 启动线程
     qDebug() << "[DEBUG] Starting threadLoginCheck...";
     threadLoginCheck->start();
-    connect(this,SIGNAL(finishedLoginControllerSignal(const int messageflag);),
-                this,SLOT(finishedLoginControllerThreadSlot(const int messageflag)));
+
 }
 
 /**
@@ -147,6 +152,6 @@ void LoginController::finishedLoginControllerThreadSlot(const int messageflag)
 
     // 发送信号给UI，通知登录结果
     emit finishedLoginUISignal(uiMessage);
-
+    qDebug()<<"[DEBUG] emit finishedLoginUISignal:"<<uiMessage;
 }
 

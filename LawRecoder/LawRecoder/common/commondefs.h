@@ -8,5 +8,5 @@
 #define LOGINERROR     4   // 登录失败
 #define USERINPUTEMPTY 5   // 用户输入为空
 #define VERERROR       6   // 验证错误
-
+#define SQLGETERROR    7   //查询错误
 #endif // COMMONDEFS_H
