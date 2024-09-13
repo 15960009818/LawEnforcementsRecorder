@@ -39,6 +39,8 @@ private:
 
     QGridLayout *gridLayout;
     QVBoxLayout *mainLayout;
+private slots:
+    void showLoginControllerResultUISlot(const QString &uiMessage);
 };
 
 #endif // LOGINWIN_H

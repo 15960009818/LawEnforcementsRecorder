@@ -40,7 +40,8 @@ HEADERS += \
     common/sqlite3crud.h \
     win/loginwin.h \
     controller/logincontroller.h \
-    service/loginservice.h
+    service/loginservice.h \
+    common/commondefs.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

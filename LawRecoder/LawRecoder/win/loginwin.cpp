@@ -1,5 +1,7 @@
 #include "loginwin.h"
 
+#include <QMessageBox>
+
 LoginWin::LoginWin(QWidget *parent)
 {
     setUi();
@@ -76,6 +78,7 @@ void LoginWin::connectSignals()
     qDebug() << "[DEBUG] btnOk exists:" << btnOk;
        qDebug() << "[DEBUG] btnReset exists:" << btnReset;
        qDebug() << "[DEBUG] btnCancel exists:" << btnCancel;
+    connect(&Singleton<LoginController>::getInstance(),SIGNAL(finishedLoginUISignal(const QString &uiMessage)),this,SIGNAL(showLoginControllerResultUISlot(const QString &uiMessage)));
     connect(btnOk, &QPushButton::clicked, this, &LoginWin::BtnClicked);
     connect(btnReset, &QPushButton::clicked, this, &LoginWin::BtnClicked);
     connect(btnCancel, &QPushButton::clicked, this, &LoginWin::BtnClicked);
@@ -114,4 +117,9 @@ void LoginWin::BtnClicked()
         qDebug() << "[DEBUG] Login canceled.";
         close();
     }
+}
+
+void LoginWin::showLoginControllerResultUISlot(const QString &uiMessage)
+{
+   QMessageBox::information(this, "登录结果", uiMessage);
 }

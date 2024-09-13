@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QDebug>
+#include <QString>
 #include "../common/singleton.h"
 #include "../service/loginservice.h"
 class LoginController:public QObject
@@ -13,7 +14,8 @@ class LoginController:public QObject
 signals:
         void LoginCheckSignals(const QString& userAccount, const QString& userPassword, const QString& inputVerificationCode, const QString& generatedVerificationCode);
         void startedLoginSignal();
-        void finishedLoginServiceSignal(int result);
+        void finishedLoginControllerSignal(const int messageflag);
+        void finishedLoginUISignal(const QString &uiMessage);
 public:
     void initController();
 
@@ -22,6 +24,7 @@ public:
 
 public slots:
         void LoginCheckSlots(const QString& userAccount, const QString& userPassword, const QString& inputVerificationCode, const QString& generatedVerificationCode);
+
 private:
         int loginflag;
         QThread *threadLoginCheck;
@@ -29,7 +32,8 @@ private:
 private slots:
         void startLoginSlot();
         void quitLoginServiceThreadSlot();
-        void finishedLoginServiceThreadSlot();
+        void finishedLoginControllerThreadSlot(const int messageflag);
+
 };
 
 #endif // LOGINCONTROLLER_H
