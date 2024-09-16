@@ -4,10 +4,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    LoginService l;
-    l.GetLoginCheckSlots("dsada","dsadas");
-//    LoginWin w;
-//    w.show();
+    LoginWin w;
+    w.show();
 
     return a.exec();
 }

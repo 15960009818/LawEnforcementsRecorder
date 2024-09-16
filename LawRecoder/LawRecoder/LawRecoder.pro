@@ -31,7 +31,8 @@ SOURCES += \
     common/sqlite3crud.cpp \
     win/loginwin.cpp \
     controller/logincontroller.cpp \
-    service/loginservice.cpp
+    service/loginservice.cpp \
+    common/fdecodeplay.cpp
 
 HEADERS += \
         widget.h \
@@ -41,8 +42,18 @@ HEADERS += \
     win/loginwin.h \
     controller/logincontroller.h \
     service/loginservice.h \
-    common/commondefs.h
+    common/commondefs.h \
+    common/fdecodeplay.h
 
+INCLUDEPATH +=$$PWD/ffmpeglib/include
+LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \
+        $$PWD/ffmpeglib/lib/avdevice.lib \
+        $$PWD/ffmpeglib/lib/avfilter.lib \
+        $$PWD/ffmpeglib/lib/avformat.lib \
+        $$PWD/ffmpeglib/lib/avutil.lib \
+        $$PWD/ffmpeglib/lib/postproc.lib \
+        $$PWD/ffmpeglib/lib/swresample.lib \
+        $$PWD/ffmpeglib/lib/swscale.lib
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

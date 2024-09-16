@@ -23,19 +23,12 @@ void LoginService::GetLoginCheckSlots(const QString &userAccount, const QString 
     if(res == 0)//打开成功
 
     {
-
     qDebug()<<"open dataBase success!"<<endl;
-
     }
-
     else
-
     {
-
     qDebug()<<sqlite3_errcode(db)<<endl;
-
     qDebug()<<sqlite3_errmsg(db)<<endl;
-
     }
 
     // 准备 SQL 查询语句

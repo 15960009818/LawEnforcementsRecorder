@@ -84,8 +84,6 @@ void LoginController::LoginCheckSlots(const QString &userAccount, const QString 
     // 线程完成时销毁,先销毁线程再发送ui防止卡死
     connect(threadLoginCheck,SIGNAL(finished()),threadLoginCheck,SLOT(deleteLater()));
     connect(threadLoginCheck, &QThread::finished, loginService, &QObject::deleteLater);
-//    connect(this, SIGNAL(finishedLoginControllerSignal(int)),
-//                this, SLOT(finishedLoginControllerThreadSlot(int)), Qt::QueuedConnection);//不指定Qt::QueuedConnection会接收不到
 
     // 启动线程
     qDebug() << "[DEBUG] Starting threadLoginCheck...";
