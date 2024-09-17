@@ -32,7 +32,8 @@ SOURCES += \
     win/loginwin.cpp \
     controller/logincontroller.cpp \
     service/loginservice.cpp \
-    common/fdecodeplay.cpp
+    common/fdecodeplay.cpp \
+    win/mainwin.cpp
 
 HEADERS += \
         widget.h \
@@ -43,7 +44,8 @@ HEADERS += \
     controller/logincontroller.h \
     service/loginservice.h \
     common/commondefs.h \
-    common/fdecodeplay.h
+    common/fdecodeplay.h \
+    win/mainwin.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \

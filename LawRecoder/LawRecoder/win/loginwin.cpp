@@ -97,46 +97,65 @@ void LoginWin::connectSignals()
             this, SLOT(showLoginControllerResultUISlot(const QString &)),
             Qt::QueuedConnection);
 
+    //确定按钮
     connect(btnOk, &QPushButton::clicked, this, &LoginWin::BtnClicked);
+    //重置清空按钮
     connect(btnReset, &QPushButton::clicked, this, &LoginWin::BtnClicked);
+    //取消按钮
     connect(btnCancel, &QPushButton::clicked, this, &LoginWin::BtnClicked);
 }
 
 
 /**
- * @brief LoginWin::BtnClicked 确认登录按钮功能槽
+ * @brief LoginWin::BtnClicked 按钮功能槽
+ * 根据不同按钮执行不同的操作
  */
 void LoginWin::BtnClicked()
 {
+    // 获取发送信号的按钮
     QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
 
-    //传账号，密码，用户输入的验证码，验证码
+    // 确定按钮的操作
     if (clickedButton == btnOk) {
-        //用户账号
+        // 获取用户输入的信息
         QString userId = editUserId->text();
         QString password = editPwd->text();
         QString inputVerificationCode = editVfcd->text();
         QString generatedVerificationCode = labVerificationCode->getVerificationCode();
+
+        // 输出调试信息
         qDebug() << "[DEBUG] User ID:" << userId;
         qDebug() << "[DEBUG] Password:" << password;
         qDebug() << "[DEBUG] Input Verification Code:" << inputVerificationCode;
         qDebug() << "[DEBUG] Generated Verification Code:" << generatedVerificationCode;
 
+        // 发送登录验证信号
         emit Singleton<LoginController>::getInstance().LoginCheckSignals(userId, password, inputVerificationCode, generatedVerificationCode);
 
+    // 重置按钮的操作
     } else if (clickedButton == btnReset) {
+        // 清空输入框
         editUserId->clear();
         editPwd->clear();
         editVfcd->clear();
 
+        // 输出重置操作的调试信息
         qDebug() << "[DEBUG] Input fields reset.";
 
+    // 取消按钮的操作
     } else if (clickedButton == btnCancel) {
+        // 输出取消登录操作的调试信息
         qDebug() << "[DEBUG] Login canceled.";
+        // 关闭窗口
         close();
     }
 }
 
+/**
+ * @brief LoginWin::showLoginControllerResultUISlot
+ * logincontroller结果弹出框
+ * @param uiMessage
+ */
 void LoginWin::showLoginControllerResultUISlot(const QString &uiMessage)
 {
    QMessageBox::information(this, "登录结果", uiMessage);

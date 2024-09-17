@@ -21,7 +21,7 @@ void LoginController::setLoginFlag(int flag) {
 }
 
 /**
- * @brief LoginController::initController 初始化函数
+ * @brief LoginController::initController 初始化信号与槽
  */
 void LoginController::initController()
 {
