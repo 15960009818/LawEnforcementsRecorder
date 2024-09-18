@@ -6,7 +6,7 @@
  * @函数名: fdecodeplay
  * @描述: 构造函数，用于初始化 fdecodeplay 类的实例
  * @作者: 翔君
- * @创建日期: 2024/9/14
+ * @创建日期: 2024/9/16
  * @是否完成: 完成
  */
 fdecodeplay::fdecodeplay()
@@ -18,7 +18,7 @@ fdecodeplay::fdecodeplay()
  * @函数名: registerFFmpeg
  * @描述: 注册 FFmpeg 库以确保所有编解码器和设备可用
  * @作者: 翔君
- * @创建日期: 2024/9/14
+ * @创建日期: 2024/9/16
  * @是否完成: 完成
  */
 void fdecodeplay::registerFFmpeg()
@@ -32,7 +32,7 @@ void fdecodeplay::registerFFmpeg()
  * @描述: 打开并解码指定路径的视频文件，解码视频帧不作其他处理
  * @参数: filename 视频文件的路径
  * @作者: 翔君
- * @创建日期: 2024/9/14
+ * @创建日期: 2024/9/16
  * @是否完成: 完成
  */
 void fdecodeplay::decodeVideoStream(const QString &filename)
@@ -119,7 +119,7 @@ void fdecodeplay::decodeVideoStream(const QString &filename)
  * @函数名: run
  * @描述: 重写的线程运行函数，负责调用解码功能
  * @作者: 翔君
- * @创建日期: 2024/9/14
+ * @创建日期: 2024/9/16
  * @是否完成: 完成
  */
 void fdecodeplay::run()
@@ -135,7 +135,7 @@ void fdecodeplay::run()
  * @描述: 设置视频路径的函数
  * @参数: value 传入的路径值
  * @作者: 翔君
- * @创建日期: 2024/9/14
+ * @创建日期: 2024/9/16
  * @是否完成: 完成
  */
 void fdecodeplay::setPicname(const QString &value)

@@ -1,12 +1,12 @@
-#ifndef MAINWIN_H
-#define MAINWIN_H
+#ifndef INDEXWIN_H
+#define INDEXWIN_H
 
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
 #include <QGridLayout>
 
-class MainWin :public QWidget
+class IndexWin :public QWidget
 {
     Q_OBJECT
 private:
@@ -24,13 +24,13 @@ private:
 
         QGridLayout *glay;        // 网格布局
 public:
-    explicit MainWin(QWidget *parent = nullptr);
+    explicit IndexWin(QWidget *parent = nullptr);
 
     // 设置UI界面
     void setUi();
     void connectSignals();
 private slots:
-    //void BtnClicked();
+    void BtnClicked();
 };
 
-#endif // MAINWIN_H
+#endif // IndexWin_H
