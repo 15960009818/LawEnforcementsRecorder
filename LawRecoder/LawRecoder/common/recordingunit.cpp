@@ -83,14 +83,3 @@ AVFrame* RecordingUnit::transCameraCaptureToYUV(AVCodecContext* codec, AVFrame* 
     return pictureYUV;
 }
 
-// 发送 QImage 图片
-void RecordingUnit::sendImg(QImage img)
-{
-    emit sendImg(img);  // 发送图片信号
-}
-
-// 发送 YUV 数据
-void RecordingUnit::sendYUV(AVFrame* pictureYUV)
-{
-    emit sendYUV(pictureYUV);  // 发送 YUV 信号
-}
