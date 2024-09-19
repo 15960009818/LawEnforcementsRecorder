@@ -5,7 +5,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QGridLayout>
-
+#include "../controller/indexcontroller.h"
+#include "../common/singleton.h"
 class IndexWin :public QWidget
 {
     Q_OBJECT

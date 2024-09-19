@@ -5,42 +5,42 @@
  * @描述: 负责处理图像数据的线程类，继承自 QThread。
  *        该类通过调用 RecordingUnit 工具类的函数来处理摄像头获取的图像，并将处理后的图像发送给主线程。
  * @作者: 翔君
- * @创建日期: 2024/9/16
+ * @创建日期: 2024/9/18
  * @是否完成: 完成
  */
 RecordThread::RecordThread(QObject *parent)
-    : QThread(parent), recordingUnit(new RecordingUnit)
+    : QThread(parent), recordingUnit(new RecordingUnit), processType(NONE)
 {
 }
 
 /**
  * @函数名: setParams
- * @描述: 设置线程的参数，包括解码器上下文、帧数据、色彩空间转换上下文、缓冲区和处理类型（图像或 YUV）。
+ * @描述: 设置线程的参数，包括解码器上下文、帧数据、色彩空间转换上下文、缓冲区和处理类型（图像、YUV 或两者）。
  * @参数: AVCodecContext *codec - 解码器上下文
  *        AVFrame *picture - 原始帧数据
  *        SwsContext *sws_content - 色彩空间转换上下文
  *        uint8_t *buffer - 数据缓冲区
- *        bool isImg - 是否处理图像（true）还是 YUV 数据（false）
+ *        ProcessType type - 处理类型（IMAGE, YUV, BOTH）
  * @返回值: 无
  * @作者: 翔君
  * @创建日期: 2024/9/18
  * @是否完成: 完成
  */
-void RecordThread::setParams(AVCodecContext* codec, AVFrame* picture, SwsContext* sws_content, uint8_t* buffer, bool isImg)
+void RecordThread::setParams(AVCodecContext* codec, AVFrame* picture, SwsContext* sws_content, uint8_t* buffer, ProcessType type)
 {
     QMutexLocker locker(&mutex);
     this->codec = codec;
     this->picture = picture;
     this->sws_content = sws_content;
     this->buffer = buffer;
-    this->isImage = isImg;
+    this->processType = type;
     started = true;
     condition.wakeOne();
 }
 
 /**
  * @函数名: run
- * @描述: 线程执行的入口函数，根据参数选择处理图像或 YUV 数据。
+ * @描述: 线程执行的入口函数，根据参数选择处理图像、YUV 数据，或同时处理两者。
  * @参数: 无
  * @返回值: 无
  * @作者: 翔君
@@ -53,9 +53,10 @@ void RecordThread::run()
     while (!started)
         condition.wait(&mutex);
 
-    if (isImage)
+    if (processType == IMAGE || processType == BOTH)
         processImg();
-    else
+
+    if (processType == YUV || processType == BOTH)
         processYUV();
 }
 

@@ -48,7 +48,7 @@ AVFormatContext* RecordingUnit::getCameraCapture(QString camera)
     return forcontent;
 }
 
-/// 将获取到的图像信息转化为 IMG 格式并返回 QImage
+// 将获取到的图像信息转化为 IMG 格式并返回 QImage
 QImage RecordingUnit::transCameraCaptureToIMG(AVCodecContext* codec, AVFrame* picture, SwsContext* sws_contentRGB, uint8_t* bufferRGB)
 {
     // 处理图像转为 RGB 格式
