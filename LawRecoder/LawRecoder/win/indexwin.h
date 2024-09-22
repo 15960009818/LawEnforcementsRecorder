@@ -24,14 +24,18 @@ private:
         QPushButton *BtnRgs;      // 注册按钮
 
         QGridLayout *glay;        // 网格布局
+
+         QImage img;              //摄像头图像
 public:
     explicit IndexWin(QWidget *parent = nullptr);
 
     // 设置UI界面
     void setUi();
     void connectSignals();
+    void paintEvent(QPaintEvent *event);
 private slots:
     void BtnClicked();
+    void recviceImage(const QImage &img);
 };
 
 #endif // IndexWin_H
