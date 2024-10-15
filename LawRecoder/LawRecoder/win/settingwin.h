@@ -9,11 +9,12 @@
 #include <QSlider>
 #include <QWidget>
 #include <QString>
+#include <QMessageBox>
 class SettingWin :public QWidget
 {
     Q_OBJECT
 signals:
-    void pathSelected(QString pathName);
+    void pathSelected(QString pathName,qint64 requiredSpaceMB);
 public:
     /**
      * @函数名: LoginWin
@@ -67,6 +68,7 @@ private:
        QComboBox *CombDvid;
 
        QString PathName;
+
 private slots:
     /**
      * @函数名: BtnClicked
@@ -75,12 +77,14 @@ private slots:
      * @创建日期: 2024/9/19
      * @是否完成: 未完成
      */
-       void BtnClicked();
+//       void BtnClicked();
        void VideoPathClickedSlots();
        void PicturePathClickedSlots();
        void BtnOkSlot();
        void BtnCancelSlot();
        void checkVideoPathSlots();
+       void handleSpaceInsufficient(QString errorMsg);
+       void handleSpaceSufficient(qint64 availableSpaceMB);
 };
 
 #endif // SETTINGWIN_H

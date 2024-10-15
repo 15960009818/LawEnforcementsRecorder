@@ -38,7 +38,8 @@ SOURCES += \
     win/indexwin.cpp \
     common/recordthread.cpp \
     win/settingwin.cpp \
-    controller/settingcontroller.cpp
+    controller/settingcontroller.cpp \
+    win/imagecapturewin.cpp
 
 HEADERS += \
         widget.h \
@@ -55,7 +56,8 @@ HEADERS += \
     common/recordingunit.h \
     common/recordthread.h \
     win/settingwin.h \
-    controller/settingcontroller.h
+    controller/settingcontroller.h \
+    win/imagecapturewin.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \
