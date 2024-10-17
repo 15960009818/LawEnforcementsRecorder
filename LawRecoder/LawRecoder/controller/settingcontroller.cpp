@@ -5,6 +5,7 @@
 SettingController::SettingController()
 {
     initController();
+
 }
 SettingController::~SettingController(){
 
@@ -16,7 +17,7 @@ void SettingController::initController()
 {
     qDebug() << "[DEBUG] Initializing SettingController...";
 
-    connect(settingWin,SIGNAL(pathSelected(QString,qint64)),this,SLOT(getPathSlots(QString,qint64)));
+    connect(this,SIGNAL(pathSelected(QString,qint64)),this,SLOT(getPathSlots(QString,qint64)));
 
 }
 /**
@@ -60,12 +61,12 @@ void SettingController::getPathSlots(QString PathName, qint64 requiredSpaceMB)
     // 判断剩余空间是否足够
     if (availableSpace > requiredSpaceMB * 1024 * 1024) {
         qDebug() << "[INFO] Sufficient space available.";
-        emit spaceSufficient(availableSpace / (1024 * 1024));  // 发射剩余空间信号
+        emit spaceSufficient(availableSpace / (1024 * 1024));  // 发射剩余空间信号给settingwin
     } else {
         qDebug() << "[WARNING] Insufficient space.";
         QString errorMsg = QString("Insufficient space! Required: %1 MB, Available: %2 MB")
                            .arg(requiredSpaceMB).arg(availableSpace / (1024 * 1024));
-        emit spaceInsufficient(errorMsg);  // 发射错误信息信号
+        emit spaceInsufficient(errorMsg);  // 发射错误信息信号给settingwin
     }
 }
 

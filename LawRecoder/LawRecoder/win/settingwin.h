@@ -14,7 +14,7 @@ class SettingWin :public QWidget
 {
     Q_OBJECT
 signals:
-    void pathSelected(QString pathName,qint64 requiredSpaceMB);
+
 public:
     /**
      * @函数名: LoginWin

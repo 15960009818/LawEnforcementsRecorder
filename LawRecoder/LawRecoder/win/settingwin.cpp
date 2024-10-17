@@ -122,7 +122,7 @@ void SettingWin::VideoPathClickedSlots()
         qint64 requiredSpaceMB = this->editMemSpc->text().toLongLong();
 
         // 发射路径选择信号
-        emit pathSelected(PathName,requiredSpaceMB);
+        emit Singleton<SettingController>::getInstance().pathSelected(PathName,requiredSpaceMB);
 
 }
 
