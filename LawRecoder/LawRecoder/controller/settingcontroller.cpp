@@ -1,5 +1,5 @@
 #include "settingcontroller.h"
-
+#include "../service/deviceservice.h"
 #include <QStorageInfo>
 
 SettingController::SettingController()
@@ -61,6 +61,11 @@ void SettingController::getPathSlots(QString PathName, qint64 requiredSpaceMB)
     // 判断剩余空间是否足够
     if (availableSpace > requiredSpaceMB * 1024 * 1024) {
         qDebug() << "[INFO] Sufficient space available.";
+
+        DeviceService *dev = new DeviceService;
+        //写入视频路径
+           dev->setVideoPath(&PathName);
+
         emit spaceSufficient(availableSpace / (1024 * 1024));  // 发射剩余空间信号给settingwin
     } else {
         qDebug() << "[WARNING] Insufficient space.";

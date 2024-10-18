@@ -4,7 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui\
+            multimedia\
+            widgets\
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -39,7 +41,8 @@ SOURCES += \
     common/recordthread.cpp \
     win/settingwin.cpp \
     controller/settingcontroller.cpp \
-    win/imagecapturewin.cpp
+    win/imagecapturewin.cpp \
+    service/deviceservice.cpp
 
 HEADERS += \
         widget.h \
@@ -57,7 +60,8 @@ HEADERS += \
     common/recordthread.h \
     win/settingwin.h \
     controller/settingcontroller.h \
-    win/imagecapturewin.h
+    win/imagecapturewin.h \
+    service/deviceservice.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \

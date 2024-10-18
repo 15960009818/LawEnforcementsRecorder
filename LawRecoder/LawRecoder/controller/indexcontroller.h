@@ -16,7 +16,8 @@ public slots:
         void handleImageReady(const QImage &img);
 private:
      RecordThread *recordThread;
-    
+    QStringList getAvailableCameras();
+     void initController();
 };
 
 #endif // INDEXCONTROLLER_H
