@@ -42,7 +42,10 @@ SOURCES += \
     win/settingwin.cpp \
     controller/settingcontroller.cpp \
     win/imagecapturewin.cpp \
-    service/deviceservice.cpp
+    service/deviceservice.cpp \
+    controller/imagecapturecontroller.cpp \
+    dao/picturedao.cpp \
+    service/imagecaptureservice.cpp
 
 HEADERS += \
         widget.h \
@@ -61,7 +64,10 @@ HEADERS += \
     win/settingwin.h \
     controller/settingcontroller.h \
     win/imagecapturewin.h \
-    service/deviceservice.h
+    service/deviceservice.h \
+    controller/imagecapturecontroller.h \
+    dao/picturedao.h \
+    service/imagecaptureservice.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \
@@ -77,3 +83,6 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 LIBS += $$PWD/lib/sqlite3.lib
+INCLUDEPATH +=D:/QT/opencv_3.4.2_Qt/include
+LIBS +=D:/QT/opencv_3.4.2_Qt/x86/bin/libopencv_*.dll \
+D:/QT/opencv_3.4.2_Qt/x86/bin/opencv_ffmpeg342.dll

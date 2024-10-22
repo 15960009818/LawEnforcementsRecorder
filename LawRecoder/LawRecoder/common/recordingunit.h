@@ -20,13 +20,14 @@ public:
     AVFormatContext *getCameraCapture(QString camera);
     QImage transCameraCaptureToIMG(AVCodecContext *codec, AVFrame *picture, SwsContext *sws_contentRGB, uint8_t *bufferRGB);
     AVFrame *transCameraCaptureToYUV(AVCodecContext *codec, AVFrame *picture, SwsContext *sws_content, uint8_t *buffer);
-
+    QStringList getAvailableCameras();
 
 
 signals://信号：
 
 private:
     void registerFFmpeg();//注册组件
+
 
 
 };

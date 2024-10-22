@@ -31,22 +31,5 @@ void IndexController::handleImageReady(const QImage &img)
     emit sendImg(img);
 }
 
-QStringList IndexController::getAvailableCameras()
-{
-    QStringList cameraNames;
 
-            // 获取所有可用的摄像头信息
-            QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-            for (const QCameraInfo &cameraInfo : cameras) {
-                QString cameraName = cameraInfo.deviceName();
-                cameraNames.append(cameraName);
-                qDebug() << "[INFO] Found camera:" << cameraName;  // 输出找到的摄像头名称
-            }
 
-            if (cameraNames.isEmpty()) {
-                qDebug() << "[WARNING] No cameras found!";
-            }
-
-            return cameraNames;
-        }
-}

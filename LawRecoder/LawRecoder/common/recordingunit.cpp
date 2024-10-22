@@ -1,4 +1,5 @@
 #include "recordingunit.h"
+#include <QCameraInfo>
 #include <QDebug>
 RecordingUnit::RecordingUnit()
 {
@@ -10,7 +11,26 @@ void RecordingUnit::registerFFmpeg()
     av_register_all();
     avdevice_register_all();//注册设备
 }
-
+/**
+ * @brief IndexController::getAvailableCameras 获取摄像头名称
+ * @return QStringList 所以的摄像头设备
+ */
+QStringList RecordingUnit::getAvailableCameras()
+{
+    QStringList cameraNames;
+    QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    if (cameras.isEmpty()) {
+        qDebug() << "[WARNING] No cameras found!";
+    } else {
+        for (const QCameraInfo &cameraInfo : cameras) {
+            QString cameraName = cameraInfo.deviceName();
+            QString cameraDescription = cameraInfo.description();  // 获取摄像头的描述信息
+            cameraNames.append(cameraDescription);  // 使用 description 来获取摄像头的实际名称
+            qDebug() << "[INFO] Found camera:" << cameraName << ", Description:" << cameraDescription;
+        }
+    }
+    return cameraNames;
+}
 /**
  * @brief RecordingUnit::getCameraCapture 获取摄像头信息
  */
