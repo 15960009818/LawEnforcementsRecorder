@@ -93,6 +93,8 @@ void ImageCaptureWin::setUi()
 
 void ImageCaptureWin::connectSignals()
 {
+    connect(&Singleton<ImageCaptureController>::getInstance(), &ImageCaptureController::finishPictureSignal,
+                this, &ImageCaptureWin::onFinishedPictureQuery);
     // 将返回按钮 TlBtnReturn 连接到 BtnClicked 槽函数
     connect(TlBtnReturn, &QToolButton::clicked, this, &ImageCaptureWin::BtnClicked);
 
@@ -104,12 +106,59 @@ void ImageCaptureWin::connectSignals()
 
     // 将查看更多按钮 BtnMore 连接到 BtnClicked 槽函数
     connect(BtnMore, &QPushButton::clicked, this, &ImageCaptureWin::BtnClicked);
+
+
 }
 
 
 void ImageCaptureWin::paintEvent(QPaintEvent *event)
 {
 
+}
+void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList<PictureDao> &pictureList)
+{
+    qDebug() << "[DEBUG] 收到图片查询结果: " << message;
+
+    // 先清空当前显示的图片和信息
+    videowins->clear();
+    LabptNameS->clear();
+    LabptTimeS->clear();
+    LabptPathS->clear();
+
+    // 显示查询结果的消息
+    if (!pictureList.isEmpty()) {
+        for (const PictureDao &pic : pictureList) {
+            // 创建一个 QListWidgetItem 来显示图片名称和路径
+            QListWidgetItem *item = new QListWidgetItem();
+            item->setText("图片名称: " + pic.getPictureName() + "\n图片路径: " + pic.getPicturePath());
+            videowins->addItem(item);
+
+            // 显示图片预览
+            QPixmap pixmap(pic.getPicturePath());
+            if (!pixmap.isNull()) {
+                item->setIcon(QIcon(pixmap.scaled(140, 100, Qt::KeepAspectRatio)));  // 设置缩略图
+            }
+
+            // 显示详细信息（如第一次的图片名称、时间、路径）
+            if (pictureList.indexOf(pic) == 0) {
+                LabptNameS->setText(pic.getPictureName());
+                LabptTimeS->setText(pic.getPictureDate());
+                LabptPathS->setText(pic.getPicturePath());
+
+                LabptName->show();
+                LabptTime->show();
+                LabptPath->show();
+                LabptNameS->show();
+                LabptTimeS->show();
+                LabptPathS->show();
+            }
+        }
+    } else {
+        // 如果没有图片记录，显示提示消息
+        LabptNameS->setText("没有找到图片记录");
+        LabptName->show();
+        LabptNameS->show();
+    }
 }
 
 void ImageCaptureWin::BtnClicked()

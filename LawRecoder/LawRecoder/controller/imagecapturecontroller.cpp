@@ -12,12 +12,13 @@ ImageCaptureController::~ImageCaptureController()
 
 void ImageCaptureController::initController()
 {
-    connect(this,SIGNAL(dateSignal(QDate,int )),this,SLOT(getPictureMessage(QDate,int)));
-
+    connect(this,SIGNAL(dateSignal(QDate,int )),this,SLOT(getPictureMessageSlot(QDate,int)));
+    connect(this,SIGNAL(finishedPictureQuerySignal(int,QList<PictureDao>&)),
+            this,SLOT(sendPictureMessageSlot(int,QList<PictureDao>&)));
 }
 
 
-void ImageCaptureController::getPictureMessage(QDate pictureDate,int row)
+void ImageCaptureController::getPictureMessageSlot(QDate pictureDate,int row)
 {
     qDebug() << "[DEBUG] getPictureMessage called.";
     qDebug() << "[DEBUG] PictureDate:" << pictureDate;
@@ -65,6 +66,36 @@ void ImageCaptureController::getPictureMessage(QDate pictureDate,int row)
 }
 
 
+void ImageCaptureController::sendPictureMessageSlot(int SQLRESULT, const QList<PictureDao> &pictureMessage)
+{
+    qDebug() << "[DEBUG] Picture query process finished, SQL result:" << SQLRESULT;
+
+    QString uiMessage;
+
+    // 根据 SQLRESULT 解析不同的消息
+    switch (SQLRESULT) {
+        case SQLERROR:
+            uiMessage = "数据库错误，无法获取图片信息。";
+            break;
+        case SQLSUCCESS:
+            if (pictureMessage.isEmpty()) {
+                uiMessage = "没有找到任何图片记录。";
+            } else {
+                uiMessage = "图片信息获取成功，共找到 " + QString::number(pictureMessage.size()) + " 条记录。";
+            }
+            break;
+        case SQLGETERROR:
+            uiMessage = "查询失败，可能是查询条件错误。";
+            break;
+        default:
+            uiMessage = "发生未知错误。";
+            break;
+    }
+
+    // 发送信号给UI，通知图片查询结果
+    emit finishPictureSignal(uiMessage, pictureMessage);
+    qDebug() << "[DEBUG] emit finishedPictureQuerySignal:" << uiMessage;
+}
 
 
 QDate ImageCaptureController::getCurrentDate()

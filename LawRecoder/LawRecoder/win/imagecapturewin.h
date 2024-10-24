@@ -12,6 +12,8 @@
 #include <QListWidget>
 #include <QListView>
 #include <QDebug>
+
+#include <dao/picturedao.h>
 class ImageCaptureWin : public QWidget
 {
     Q_OBJECT
@@ -26,6 +28,7 @@ public:
 private slots:
     void BtnClicked();
 
+    void onFinishedPictureQuery(const QString &message, const QList<PictureDao> &pictureList);
 private:
     QGridLayout *glay;           // 网格布局
     QLabel *LabTitle;            // 标题标签

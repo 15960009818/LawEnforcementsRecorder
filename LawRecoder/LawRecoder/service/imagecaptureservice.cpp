@@ -11,12 +11,14 @@ ImageCaptureService::ImageCaptureService(QObject *parent) : QObject(parent)
 {
 }
 
-// 获取指定日期的图片信息
-void ImageCaptureService::GetDateImageSlots(const QDate &date , const int &Row)
+// 获取指定日期的图片信息，分页查询，每页 4 条记录
+void ImageCaptureService::GetDateImageSlots(const QDate &date, const int &page)
 {
     sqlite3 *db = nullptr;
     sqlite3_stmt *stmt;
     int rc;
+    const int itemsPerPage = 4; // 每页固定返回 4 条记录
+    int offset = (page - 1) * itemsPerPage; // 计算偏移量
 
     // 打开数据库
     int res = sqlite3_open("data/video.db", &db);
@@ -29,10 +31,11 @@ void ImageCaptureService::GetDateImageSlots(const QDate &date , const int &Row)
 
     qDebug() << "Database opened successfully!";
 
-    // 准备 SQL 查询语句
+
     const char *sql = "SELECT picture_id, picture_name, picture_address, picture_date, picture_user, picture_type, picture_path "
                       "FROM picture "
-                      "WHERE picture_date = ? AND picture_type = 1";
+                      "WHERE picture_date = ? AND picture_type = 1 "
+                      "LIMIT ? OFFSET ?";
 
     // 准备 SQL 语句
     rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -46,6 +49,10 @@ void ImageCaptureService::GetDateImageSlots(const QDate &date , const int &Row)
 
     // 绑定日期参数
     sqlite3_bind_text(stmt, 1, date.toString("yyyy-MM-dd").toUtf8().constData(), -1, SQLITE_STATIC);
+    // 绑定 LIMIT 参数 (itemsPerPage 固定为 4)
+    sqlite3_bind_int(stmt, 2, itemsPerPage);
+    // 绑定 OFFSET 参数
+    sqlite3_bind_int(stmt, 3, offset);
 
     QList<PictureDao> pictures; // 用于存储查询结果
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
@@ -80,4 +87,5 @@ void ImageCaptureService::GetDateImageSlots(const QDate &date , const int &Row)
     // 关闭数据库
     sqlite3_close(db);
 }
+
 
