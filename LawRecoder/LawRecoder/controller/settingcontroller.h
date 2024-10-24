@@ -14,7 +14,7 @@ class SettingController : public QObject
     SINGLETON(SettingController)
 
 private:
-    SettingWin* settingWin; // 指向 SettingWin 的指针
+    SettingWin* settingWin;
 
 signals:
      void pathSelected(QString pathName,qint64 requiredSpaceMB);//信号：传输文件夹空间和需要的空间
@@ -28,7 +28,7 @@ public:
     }
 
     void initController(); // 初始化信号与槽
-    QString PathName; // 可以考虑移除
+
 
 private slots:
     void getPathSlots(QString PathName, qint64 requiredSpaceMB);

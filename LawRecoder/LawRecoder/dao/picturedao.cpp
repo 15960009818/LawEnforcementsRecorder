@@ -3,9 +3,9 @@
 // 构造函数实现
 PictureDao::PictureDao() : picture_id(0), picture_type(0) {}
 
-PictureDao::PictureDao(int id, const std::string& name, const std::string& address,
-                 const std::string& date, const std::string& user,
-                 int type, const std::string& path)
+PictureDao::PictureDao(int id, const QString& name, const QString& address,
+                 const QString& date, const QString& user,
+                 int type, const QString& path)
     : picture_id(id), picture_name(name), picture_address(address),
       picture_date(date), picture_user(user), picture_type(type), picture_path(path) {}
 
@@ -13,20 +13,20 @@ PictureDao::PictureDao(int id, const std::string& name, const std::string& addre
 int PictureDao::getPictureId() const { return picture_id; }
 void PictureDao::setPictureId(int id) { picture_id = id; }
 
-std::string PictureDao::getPictureName() const { return picture_name; }
-void PictureDao::setPictureName(const std::string& name) { picture_name = name; }
+QString PictureDao::getPictureName() const { return picture_name; }
+void PictureDao::setPictureName(const QString& name) { picture_name = name; }
 
-std::string PictureDao::getPictureAddress() const { return picture_address; }
-void PictureDao::setPictureAddress(const std::string& address) { picture_address = address; }
+QString PictureDao::getPictureAddress() const { return picture_address; }
+void PictureDao::setPictureAddress(const QString& address) { picture_address = address; }
 
-std::string PictureDao::getPictureDate() const { return picture_date; }
-void PictureDao::setPictureDate(const std::string& date) { picture_date = date; }
+QString PictureDao::getPictureDate() const { return picture_date; }
+void PictureDao::setPictureDate(const QString& date) { picture_date = date; }
 
-std::string PictureDao::getPictureUser() const { return picture_user; }
-void PictureDao::setPictureUser(const std::string& user) { picture_user = user; }
+QString PictureDao::getPictureUser() const { return picture_user; }
+void PictureDao::setPictureUser(const QString& user) { picture_user = user; }
 
 int PictureDao::getPictureType() const { return picture_type; }
 void PictureDao::setPictureType(int type) { picture_type = type; }
 
-std::string PictureDao::getPicturePath() const { return picture_path; }
-void PictureDao::setPicturePath(const std::string& path) { picture_path = path; }
+QString PictureDao::getPicturePath() const { return picture_path; }
+void PictureDao::setPicturePath(const QString& path) { picture_path = path; }

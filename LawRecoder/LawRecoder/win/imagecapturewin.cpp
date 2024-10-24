@@ -1,6 +1,7 @@
 #include "imagecapturewin.h"
-
-
+#include "indexwin.h"
+#include "../common/singleton.h"
+#include "../controller/imagecapturecontroller.h"
 ImageCaptureWin::ImageCaptureWin(QWidget *parent)
 {
     setUi();            // 设置UI界面
@@ -92,8 +93,19 @@ void ImageCaptureWin::setUi()
 
 void ImageCaptureWin::connectSignals()
 {
+    // 将返回按钮 TlBtnReturn 连接到 BtnClicked 槽函数
+    connect(TlBtnReturn, &QToolButton::clicked, this, &ImageCaptureWin::BtnClicked);
 
+    // 将编辑日期选择器 editdatetime 连接到 BtnClicked 槽函数
+    connect(editdatetime, &QDateEdit::dateChanged, this, &ImageCaptureWin::BtnClicked);
+
+    // 将返回图片列表按钮 BtnReturnList 连接到 BtnClicked 槽函数
+    connect(BtnReturnList, &QPushButton::clicked, this, &ImageCaptureWin::BtnClicked);
+
+    // 将查看更多按钮 BtnMore 连接到 BtnClicked 槽函数
+    connect(BtnMore, &QPushButton::clicked, this, &ImageCaptureWin::BtnClicked);
 }
+
 
 void ImageCaptureWin::paintEvent(QPaintEvent *event)
 {
@@ -102,5 +114,31 @@ void ImageCaptureWin::paintEvent(QPaintEvent *event)
 
 void ImageCaptureWin::BtnClicked()
 {
+    QObject* obj = sender();  // 获取发出信号的对象
 
+    if (obj == TlBtnReturn) {
+        qDebug() << "返回按钮点击";
+        IndexWin* indexWindow = new IndexWin();  // 创建主界面窗口
+        indexWindow->show();  // 显示主界面
+        this->hide();  // 隐藏设置窗口
+    } else if (obj == BtnReturnList) {
+        // 返回图片列表按钮点击的处理逻辑
+        qDebug() << "返回图片列表按钮点击";
+    } else if (obj == BtnMore) {
+
+        qDebug()<<"查看更多按钮点击";
+
+    } else if (obj == editdatetime) {
+        page = 1;
+        // 日期选择器更改的处理逻辑
+        QDate selectedDate = editdatetime->date();
+        
+        // 将日期格式化为(yyyy-MM-dd)
+        QString formattedDate = selectedDate.toString("yyyy-MM-dd");
+        qDebug() << "日期更改：" << formattedDate;
+    
+        // 通过信号发送 QDate 对象,第一次
+        emit Singleton<ImageCaptureController>::getInstance().dateSignal(selectedDate,page);
+
+    }
 }

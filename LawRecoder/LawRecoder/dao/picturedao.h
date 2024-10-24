@@ -1,46 +1,46 @@
 #ifndef PICTURE_H
 #define PICTURE_H
 
-#include <string>
+#include<QString>
 
 class PictureDao {
 public:
     // 构造函数
     PictureDao();
-    PictureDao(int id, const std::string& name, const std::string& address,
-            const std::string& date, const std::string& user,
-            int type, const std::string& path);
+    PictureDao(int id, const QString& name, const QString& address,
+            const QString& date, const QString& user,
+            int type, const QString& path);
 
     // Getter 和 Setter 方法
     int getPictureId() const;
     void setPictureId(int id);
 
-    std::string getPictureName() const;
-    void setPictureName(const std::string& name);
+    QString getPictureName() const;
+    void setPictureName(const QString& name);
 
-    std::string getPictureAddress() const;
-    void setPictureAddress(const std::string& address);
+    QString getPictureAddress() const;
+    void setPictureAddress(const QString& address);
 
-    std::string getPictureDate() const;
-    void setPictureDate(const std::string& date);
+    QString getPictureDate() const;
+    void setPictureDate(const QString& date);
 
-    std::string getPictureUser() const;
-    void setPictureUser(const std::string& user);
+    QString getPictureUser() const;
+    void setPictureUser(const QString& user);
 
     int getPictureType() const;
     void setPictureType(int type);
 
-    std::string getPicturePath() const;
-    void setPicturePath(const std::string& path);
+    QString getPicturePath() const;
+    void setPicturePath(const QString& path);
 
 private:
     int picture_id;
-    std::string picture_name;
-    std::string picture_address;
-    std::string picture_date;
-    std::string picture_user;
+    QString picture_name;
+    QString picture_address;
+    QString picture_date;
+    QString picture_user;
     int picture_type;
-    std::string picture_path;
+    QString picture_path;
 };
 
 #endif // PICTURE_H

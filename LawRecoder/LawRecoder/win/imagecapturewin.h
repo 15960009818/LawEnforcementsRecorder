@@ -11,7 +11,7 @@
 #include <QDateEdit>
 #include <QListWidget>
 #include <QListView>
-
+#include <QDebug>
 class ImageCaptureWin : public QWidget
 {
     Q_OBJECT
@@ -46,6 +46,8 @@ private:
     QAction *ActReturn;          // 返回动作
     QDateEdit *editdatetime;     // 日期选择器
     QListWidget *videowins;      // 显示图片列表的控件
+
+    int page;                     //记录查询页数
 };
 
 #endif // IMAGECAPTUREWIN_H
