@@ -2,8 +2,11 @@
 #define PICTURE_H
 
 #include<QString>
+#include<QObject>
 
-class PictureDao {
+class PictureDao
+{
+
 public:
     // 构造函数
     PictureDao();
@@ -33,6 +36,17 @@ public:
     QString getPicturePath() const;
     void setPicturePath(const QString& path);
 
+    // 重载操作符==
+    bool operator==(const PictureDao &other) const {
+        return picture_id == other.picture_id &&
+               picture_name == other.picture_name &&
+               picture_address == other.picture_address &&
+               picture_date == other.picture_date &&
+               picture_user == other.picture_user &&
+               picture_type == other.picture_type &&
+               picture_path == other.picture_path;
+    }
+
 private:
     int picture_id;
     QString picture_name;
@@ -42,5 +56,7 @@ private:
     int picture_type;
     QString picture_path;
 };
+
+
 
 #endif // PICTURE_H

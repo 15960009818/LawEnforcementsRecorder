@@ -2,6 +2,7 @@
 #include "indexwin.h"
 #include "../common/singleton.h"
 #include "../controller/imagecapturecontroller.h"
+#include <QMessageBox>
 ImageCaptureWin::ImageCaptureWin(QWidget *parent)
 {
     setUi();            // 设置UI界面
@@ -110,56 +111,75 @@ void ImageCaptureWin::connectSignals()
 
 }
 
-
-void ImageCaptureWin::paintEvent(QPaintEvent *event)
-{
-
-}
-void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList<PictureDao> &pictureList)
-{
-    qDebug() << "[DEBUG] 收到图片查询结果: " << message;
-
-    // 先清空当前显示的图片和信息
+void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList<PictureDao> &pictureList) {
+    // 清空之前的列表内容
     videowins->clear();
-    LabptNameS->clear();
-    LabptTimeS->clear();
-    LabptPathS->clear();
 
-    // 显示查询结果的消息
-    if (!pictureList.isEmpty()) {
-        for (const PictureDao &pic : pictureList) {
-            // 创建一个 QListWidgetItem 来显示图片名称和路径
-            QListWidgetItem *item = new QListWidgetItem();
-            item->setText("图片名称: " + pic.getPictureName() + "\n图片路径: " + pic.getPicturePath());
-            videowins->addItem(item);
+    // 根据返回的状态消息判断查询结果
+    if (message.contains("数据库错误")) {
+        QMessageBox::critical(this, "Database Error", message);
+        qDebug() << "Database error occurred:" << message;
+    } else if (message.contains("没有找到任何图片记录")) {
+        QMessageBox::information(this, "No Records Found", message);
+        qDebug() << "No picture records found.";
+    } else if (message.contains("图片信息获取成功")) {
+        qDebug() << "Successfully queried pictures, found" << pictureList.size() << "pictures.";
 
-            // 显示图片预览
-            QPixmap pixmap(pic.getPicturePath());
+        for (const PictureDao &picture : pictureList) {
+            // 打印每个图片的详细信息
+            qDebug() << "Picture ID:" << picture.getPictureId()
+                     << ", Name:" << picture.getPictureName()
+                     << ", Date:" << picture.getPictureDate()
+                     << ", Path:" << picture.getPicturePath();
+
+            // 创建一个 QWidget 作为 QListWidgetItem 的内容
+            QWidget *itemWidget = new QWidget();
+            QHBoxLayout *layout = new QHBoxLayout(itemWidget);
+
+            // 设置布局间距和边距
+            layout->setContentsMargins(5, 5, 5, 5);
+            layout->setSpacing(10);
+
+            // 图片标签，占左侧 1/4
+            QLabel *iconLabel = new QLabel();
+            QPixmap pixmap(picture.getPicturePath());
+
+            // 检查图标是否加载成功
             if (!pixmap.isNull()) {
-                item->setIcon(QIcon(pixmap.scaled(140, 100, Qt::KeepAspectRatio)));  // 设置缩略图
+                iconLabel->setPixmap(pixmap.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            } else {
+                qDebug() << "Warning: Failed to load image icon for path:" << picture.getPicturePath();
             }
 
-            // 显示详细信息（如第一次的图片名称、时间、路径）
-            if (pictureList.indexOf(pic) == 0) {
-                LabptNameS->setText(pic.getPictureName());
-                LabptTimeS->setText(pic.getPictureDate());
-                LabptPathS->setText(pic.getPicturePath());
+            layout->addWidget(iconLabel, 1); // 占1份宽度
 
-                LabptName->show();
-                LabptTime->show();
-                LabptPath->show();
-                LabptNameS->show();
-                LabptTimeS->show();
-                LabptPathS->show();
-            }
+            // 名称标签，占右侧 1/4
+            QLabel *nameLabel = new QLabel(picture.getPictureName());
+            layout->addWidget(nameLabel, 1);
+            // 日期标签，占2/4
+            QLabel *dateLabel = new QLabel(picture.getPictureDate());
+            layout->addWidget(dateLabel,4);
+
+            itemWidget->setLayout(layout);
+
+            // 创建 QListWidgetItem 并将自定义 QWidget 设置为其内容
+            QListWidgetItem *item = new QListWidgetItem();
+            item->setSizeHint(itemWidget->sizeHint()); // 设置项目大小
+            videowins->addItem(item);
+            videowins->setItemWidget(item, itemWidget); // 将 QWidget 作为内容设置
         }
+    } else if (message.contains("查询失败")) {
+        QMessageBox::warning(this, "Query Error", message);
+        qDebug() << "Query failed with message:" << message;
     } else {
-        // 如果没有图片记录，显示提示消息
-        LabptNameS->setText("没有找到图片记录");
-        LabptName->show();
-        LabptNameS->show();
+        QMessageBox::warning(this, "Unknown Error", "发生未知错误。");
+        qDebug() << "An unknown error occurred.";
     }
 }
+
+
+
+
 
 void ImageCaptureWin::BtnClicked()
 {
@@ -181,11 +201,11 @@ void ImageCaptureWin::BtnClicked()
         page = 1;
         // 日期选择器更改的处理逻辑
         QDate selectedDate = editdatetime->date();
-        
+
         // 将日期格式化为(yyyy-MM-dd)
         QString formattedDate = selectedDate.toString("yyyy-MM-dd");
         qDebug() << "日期更改：" << formattedDate;
-    
+
         // 通过信号发送 QDate 对象,第一次
         emit Singleton<ImageCaptureController>::getInstance().dateSignal(selectedDate,page);
 

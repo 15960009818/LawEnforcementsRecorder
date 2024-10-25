@@ -1,5 +1,6 @@
 #include "imagecapturecontroller.h"
 #include "../common/commondefs.h"
+#include <QMetaType>
 ImageCaptureController::ImageCaptureController()
 {
     initController();
@@ -12,9 +13,11 @@ ImageCaptureController::~ImageCaptureController()
 
 void ImageCaptureController::initController()
 {
+    qRegisterMetaType<QList<PictureDao>>("QList<PictureDao>");
+
     connect(this,SIGNAL(dateSignal(QDate,int )),this,SLOT(getPictureMessageSlot(QDate,int)));
-    connect(this,SIGNAL(finishedPictureQuerySignal(int,QList<PictureDao>&)),
-            this,SLOT(sendPictureMessageSlot(int,QList<PictureDao>&)));
+    connect(this,SIGNAL(finishedPictureQuerySignal(int,const QList<PictureDao>&)),
+            this,SLOT(sendPictureMessageSlot(int,const QList<PictureDao>&)));
 }
 
 

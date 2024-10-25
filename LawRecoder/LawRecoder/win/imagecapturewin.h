@@ -23,7 +23,7 @@ public:
     // 设置UI界面
     void setUi();
     void connectSignals();
-    void paintEvent(QPaintEvent *event) override;
+//    void paintEvent(QPaintEvent *event) override;
 
 private slots:
     void BtnClicked();
