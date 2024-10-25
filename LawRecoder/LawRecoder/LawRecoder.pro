@@ -45,7 +45,12 @@ SOURCES += \
     service/deviceservice.cpp \
     controller/imagecapturecontroller.cpp \
     dao/picturedao.cpp \
-    service/imagecaptureservice.cpp
+    service/imagecaptureservice.cpp \
+    win/imagemessagewin.cpp \
+    win/videocapturewin.cpp \
+    controller/videocapturecontroller.cpp \
+    service/videocaptureservice.cpp \
+    dao/videodao.cpp
 
 HEADERS += \
         widget.h \
@@ -67,7 +72,12 @@ HEADERS += \
     service/deviceservice.h \
     controller/imagecapturecontroller.h \
     dao/picturedao.h \
-    service/imagecaptureservice.h
+    service/imagecaptureservice.h \
+    win/imagemessagewin.h \
+    win/videocapturewin.h \
+    controller/videocapturecontroller.h \
+    service/videocaptureservice.h \
+    dao/videodao.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \

@@ -153,12 +153,12 @@ void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList
 
             layout->addWidget(iconLabel, 1); // 占1份宽度
 
-            // 名称标签，占右侧 1/4
-            QLabel *nameLabel = new QLabel(picture.getPictureName());
-            layout->addWidget(nameLabel, 1);
+//            // 名称标签，占右侧 1/4
+//            QLabel *nameLabel = new QLabel(picture.getPictureName());
+//            layout->addWidget(nameLabel, 1);
             // 日期标签，占2/4
             QLabel *dateLabel = new QLabel(picture.getPictureDate());
-            layout->addWidget(dateLabel,4);
+            layout->addWidget(dateLabel,2);
 
             itemWidget->setLayout(layout);
 
@@ -178,9 +178,6 @@ void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList
 }
 
 
-
-
-
 void ImageCaptureWin::BtnClicked()
 {
     QObject* obj = sender();  // 获取发出信号的对象
@@ -194,13 +191,14 @@ void ImageCaptureWin::BtnClicked()
         // 返回图片列表按钮点击的处理逻辑
         qDebug() << "返回图片列表按钮点击";
     } else if (obj == BtnMore) {
-
+        page++;
+        emit Singleton<ImageCaptureController>::getInstance().dateSignal(selectedDate,page);
         qDebug()<<"查看更多按钮点击";
 
     } else if (obj == editdatetime) {
         page = 1;
         // 日期选择器更改的处理逻辑
-        QDate selectedDate = editdatetime->date();
+        selectedDate = editdatetime->date();
 
         // 将日期格式化为(yyyy-MM-dd)
         QString formattedDate = selectedDate.toString("yyyy-MM-dd");

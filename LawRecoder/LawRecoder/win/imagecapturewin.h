@@ -51,6 +51,7 @@ private:
     QListWidget *videowins;      // 显示图片列表的控件
 
     int page;                     //记录查询页数
+    QDate selectedDate    ;        //选择的日期
 };
 
 #endif // IMAGECAPTUREWIN_H
