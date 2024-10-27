@@ -50,7 +50,10 @@ SOURCES += \
     win/videocapturewin.cpp \
     controller/videocapturecontroller.cpp \
     service/videocaptureservice.cpp \
-    dao/videodao.cpp
+    dao/videodao.cpp \
+    common/cameracapture.cpp \
+    common/jsonparser.cpp \
+    common/jsonbuilder.cpp
 
 HEADERS += \
         widget.h \
@@ -77,7 +80,10 @@ HEADERS += \
     win/videocapturewin.h \
     controller/videocapturecontroller.h \
     service/videocaptureservice.h \
-    dao/videodao.h
+    dao/videodao.h \
+    common/cameracapture.h \
+    common/jsonparser.h \
+    common/jsonbuilder.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \
@@ -93,6 +99,10 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 LIBS += $$PWD/lib/sqlite3.lib
+INCLUDEPATH +=D:/QT/opencv_3.4.2_Qt/include
+LIBS +=D:/QT/opencv_3.4.2_Qt/x86/bin/libopencv_*.dll \
+D:/QT/opencv_3.4.2_Qt/x86/bin/opencv_ffmpeg342.dll
+
 INCLUDEPATH +=D:/QT/opencv_3.4.2_Qt/include
 LIBS +=D:/QT/opencv_3.4.2_Qt/x86/bin/libopencv_*.dll \
 D:/QT/opencv_3.4.2_Qt/x86/bin/opencv_ffmpeg342.dll
