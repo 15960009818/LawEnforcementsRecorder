@@ -53,7 +53,9 @@ SOURCES += \
     dao/videodao.cpp \
     common/cameracapture.cpp \
     common/jsonparser.cpp \
-    common/jsonbuilder.cpp
+    common/jsonbuilder.cpp \
+    common/videocapturethread.cpp \
+    common/videosavethread.cpp
 
 HEADERS += \
         widget.h \
@@ -83,7 +85,9 @@ HEADERS += \
     dao/videodao.h \
     common/cameracapture.h \
     common/jsonparser.h \
-    common/jsonbuilder.h
+    common/jsonbuilder.h \
+    common/videocapturethread.h \
+    common/videosavethread.h
 
 INCLUDEPATH +=$$PWD/ffmpeglib/include
 LIBS += $$PWD/ffmpeglib/lib/avcodec.lib \
@@ -103,6 +107,4 @@ INCLUDEPATH +=D:/QT/opencv_3.4.2_Qt/include
 LIBS +=D:/QT/opencv_3.4.2_Qt/x86/bin/libopencv_*.dll \
 D:/QT/opencv_3.4.2_Qt/x86/bin/opencv_ffmpeg342.dll
 
-INCLUDEPATH +=D:/QT/opencv_3.4.2_Qt/include
-LIBS +=D:/QT/opencv_3.4.2_Qt/x86/bin/libopencv_*.dll \
-D:/QT/opencv_3.4.2_Qt/x86/bin/opencv_ffmpeg342.dll
+
