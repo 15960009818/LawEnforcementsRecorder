@@ -59,7 +59,7 @@ private slots:
     // 按钮点击槽函数
     void BtnClicked();
     // 接收图像信号的槽函数
-    //void recviceImage(const QImage &img);
+    void recviceImage(const QImage &img);
 };
 
 
