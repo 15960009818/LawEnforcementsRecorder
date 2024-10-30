@@ -7,6 +7,7 @@
 #include <QDebug>
 
 VideoCaptureService::VideoCaptureService(QObject *parent) : QObject(parent) {
+
 }
 
 // 获取指定日期的视频信息，分页查询，每页 4 条记录

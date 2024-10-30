@@ -27,6 +27,8 @@ void VideoSaveThread::startSaving(const QString &filename, int width, int height
 
 void VideoSaveThread::stopSaving() {
     stopFlag = true;
+    outputFile = deviceService.getVideoPath();
+    qDebug() << "Starting save thread with file:" << outputFile;
     qDebug() << "Request to stop saving.";
     stop();
 }
@@ -49,17 +51,20 @@ void VideoSaveThread::stop() {
 void VideoSaveThread::run() {
     qDebug() << "Trying to open video writer for file:" << outputFile;
 
-    // 尝试打开视频写入器
-    if (!videoWriter.open(outputFile.toStdString(), cv::VideoWriter::fourcc('M', 'P', '4', 'V'), frameRate, cv::Size(frameWidth, frameHeight))) {
-        qWarning() << "Failed to open video writer for file:" << outputFile;
-        return;
-    }
+        // 打开视频写入器
+        if (!videoWriter.open(outputFile.toStdString(), cv::VideoWriter::fourcc('M', 'P', '4', 'V'), frameRate, cv::Size(frameWidth, frameHeight))) {
+            qWarning() << "Failed to open video writer for file:" << outputFile;
+            return;
+        }
 
-    qDebug() << "Video writer opened successfully.";
-    exec();  // 保持线程事件循环
-    videoWriter.release(); // 确保视频资源释放
-    qDebug() << "Video writer released.";
+        qDebug() << "Video writer opened successfully.";
+
+        exec();
+
+        videoWriter.release();
+        qDebug() << "Video writer released.";
 }
+
 
 
 void VideoSaveThread::saveFrame(const QImage &image) {

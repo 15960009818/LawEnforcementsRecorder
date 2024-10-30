@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QImage>
 #include <opencv2/opencv.hpp>
-
+#include "../service/deviceservice.h"
 class VideoSaveThread : public QThread {
     Q_OBJECT
 
@@ -27,6 +27,7 @@ private:
     int frameWidth, frameHeight, frameRate;
     cv::VideoWriter videoWriter;
     bool stopFlag;
+     DeviceService deviceService;
 };
 
 #endif // VIDEOSAVETHREAD_H

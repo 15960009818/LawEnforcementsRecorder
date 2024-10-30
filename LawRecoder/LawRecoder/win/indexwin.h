@@ -48,6 +48,7 @@ private:
     QImage img;                 // 接收到的摄像头图像
     CameraCapture *cameraCapture; // 摄像头捕获类实例
 
+    void captureScreenshot();
 public:
     explicit IndexWin(QWidget *parent = nullptr);
     ~IndexWin();
@@ -58,8 +59,7 @@ public:
 private slots:
     // 按钮点击槽函数
     void BtnClicked();
-    // 接收图像信号的槽函数
-    void recviceImage(const QImage &img);
+
 };
 
 
