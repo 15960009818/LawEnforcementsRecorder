@@ -16,6 +16,8 @@
 
 class VideoCaptureWin : public QWidget {
     Q_OBJECT
+signals:
+    void videoSelected(const QString &videoPath); // 视频选中信号
 
 public:
     explicit VideoCaptureWin(QWidget *parent = nullptr);
@@ -46,7 +48,7 @@ private:
     QPushButton *BtnReturnList;    // 返回视频列表按钮
     QDate selectedDate;            // 选择的日期
     int page = 1;                  // 当前页面
-    QAction *ActReturn ;            //返回按钮
+    QAction *ActReturn;            // 返回按钮的动作
 };
 
 #endif // VIDEOCAPTUREWIN_H

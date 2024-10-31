@@ -3,12 +3,13 @@
 #include "../common/singleton.h"
 #include "../controller/videocapturecontroller.h"
 #include <QMessageBox>
+#include <QListWidgetItem>
 
 VideoCaptureWin::VideoCaptureWin(QWidget *parent)
 {
     setUi();            // 设置UI界面
     connectSignals();   // 连接信号和槽
-    qDebug()<<"[INFO] VideoCaptureWin Initializing Success";
+    qDebug() << "[INFO] VideoCaptureWin Initializing Success";
 }
 
 void VideoCaptureWin::setUi()
@@ -130,7 +131,17 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
             item->setSizeHint(itemWidget->sizeHint());
             videowins->addItem(item);
             videowins->setItemWidget(item, itemWidget);
+
+            // 将视频路径存储在 QListWidgetItem 的数据中
+            item->setData(Qt::UserRole, video.getVideoPath());
         }
+
+        // 连接信号
+        connect(videowins, &QListWidget::itemClicked, [this](QListWidgetItem *item) {
+            QString videoPath = item->data(Qt::UserRole).toString();
+            emit videoSelected(videoPath); // 发射信号以选择视频
+            qDebug() << "Selected video path:" << videoPath;
+        });
     } else if (message.contains("查询失败")) {
         QMessageBox::warning(this, "Query Error", message);
         qDebug() << "Query failed with message:" << message;
@@ -139,6 +150,7 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
         qDebug() << "An unknown error occurred.";
     }
 }
+
 
 void VideoCaptureWin::BtnClicked()
 {
