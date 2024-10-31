@@ -3,9 +3,10 @@
 #include <QDate>
 #include <QDebug>
 #include <QDir>
-
+#include "../service/savevideoandpictureservice.h"
+#include "../dao/picturedao.h"
 VideoCaptureThread::VideoCaptureThread(QObject *parent) : QThread(parent), stopFlag(false) {
-    deviceService = new DeviceService;
+
     qDebug() << "VideoCaptureThread initialized.";
 
 }
@@ -52,14 +53,14 @@ void VideoCaptureThread::run() {
             continue;
         }
 
-        // 使用互斥锁保护队列并限制大小
+        // 不加限制可能截图拿不到那一帧
         {
             QMutexLocker locker(&queueMutex);
             if (frameQueue.size() >= 50) {
                 frameQueue.dequeue(); // 丢弃最旧的帧，保持队列长度
             }
             frameQueue.enqueue(frame.clone());
-            qDebug() << "Frame added to queue. Queue size:" << frameQueue.size();
+            //qDebug() << "Frame added to queue. Queue size:" << frameQueue.size();
         }
 
         // 转换颜色格式并发送帧
@@ -67,16 +68,19 @@ void VideoCaptureThread::run() {
         cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
         QImage img((uchar*)rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step, QImage::Format_RGB888);
         emit frameCaptured(img.copy());
-        qDebug() << "Frame captured and emitted.";
+        //qDebug() << "Frame captured and emitted.";
     }
 
     cap.release();
     emit finished();
 }
 
+
 void VideoCaptureThread::captureScreenshot() {
-    QMutexLocker locker(&frameMutex); // 加锁确保摄像头的独占访问
+    // 加锁确保摄像头的独占访问,不然获取不到帧
+    QMutexLocker locker(&frameMutex);
     if (!cap.isOpened()) {
+        // 因为摄像头一直被播放线程占用，实际仍然可以拿到
         qWarning("Camera not open. Attempting to reopen...");
         if (!cap.open(0)) {
             qWarning("Failed to reopen camera for screenshot.");
@@ -85,10 +89,22 @@ void VideoCaptureThread::captureScreenshot() {
     }
 
     cv::Mat frame;
-    cap >> frame; // 直接捕获当前帧
+    cap >> frame;
     if (frame.empty()) {
         qWarning("Failed to capture screenshot - empty frame.");
-        return;
+        
+        // 如果未能捕获到有效的帧，则准备 PictureDao 对象并写入 NULL
+        PictureDao picture;
+        picture.setPictureName("NULL"); // 使用 setter 方法
+            picture.setPictureAddress("NULL"); // 根据实际需要填入
+            picture.setPictureDate("NULL"); // 可以根据需要修改
+            picture.setPictureUser("NULL"); // 可以根据需要修改
+            picture.setPictureType(0); // 或者根据实际情况填入
+            picture.setPicturePath("NULL"); // 图片路径为 NULL
+
+        SaveVideoAndPictureService service;
+        service.insertPictureInfo(picture); // 写入数据库
+        return; // 返回
     }
 
     // 转换颜色格式并保存图像
@@ -97,11 +113,24 @@ void VideoCaptureThread::captureScreenshot() {
     QImage img((uchar*)rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step, QImage::Format_RGB888);
 
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
-    QString filePath = deviceService->getPicturePath() + timestamp + ".jpg";
+    QString picturePath = QDir::cleanPath(Singleton<DeviceService>::getInstance().getPicturePath() + "/" + timestamp + ".jpg");
 
 
-    if (img.save(filePath, "JPEG")) {
-        qDebug() << "Screenshot saved at:" << filePath;
+    if (img.save(picturePath, "JPEG")) {
+        qDebug() << "Screenshot saved at:" << picturePath;
+
+        // 成功保存截图，准备 PictureDao 对象并写入数据库
+        PictureDao picture;
+        picture.setPictureName(timestamp); // 使用 setter 方法设置值
+        picture.setPictureAddress("null"); // 保存的文件路径
+        picture.setPictureDate(QDateTime::currentDateTime().toString("yyyy-MM-dd")); // 记录当前日期
+        picture.setPictureUser("User"); // 根据实际需要填入
+        picture.setPictureType(1); // 或者根据实际情况填入
+        picture.setPicturePath(picturePath); // 图片路径也进行修改
+
+        SaveVideoAndPictureService service;
+        service.insertPictureInfo(picture); // 写入数据库
+
     } else {
         qDebug() << "Failed to save screenshot.";
     }

@@ -147,8 +147,8 @@ void SettingWin::PicturePathClickedSlots()
     PathName = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "./",
                                                  QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    DeviceService *dev = new DeviceService;
-    dev->setPicturePath(&PathName);
+
+    Singleton<DeviceService>::getInstance().setPicturePath(&PathName);
     editPixPath->setText(PathName);  // 显示选中的路径
 }
 

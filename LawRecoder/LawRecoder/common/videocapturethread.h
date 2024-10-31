@@ -35,7 +35,7 @@ private:
     QMutex queueMutex;
     QWaitCondition frameAvailable;
     cv::Mat frame;
-    DeviceService *deviceService;
+
 
 };
 

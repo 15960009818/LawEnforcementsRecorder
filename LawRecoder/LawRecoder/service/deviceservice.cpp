@@ -3,10 +3,11 @@
 
 DeviceService::DeviceService()
 {
-    // 初始化成员变量，视频和图片路径为空字符串
-    VideoPath = "";
-    PicturePath = "";
-    qDebug() << "[INFO] DeviceService initialized with empty paths.";
+    qDebug() << "[INFO] DeviceService initialized";
+}
+
+DeviceService::~DeviceService(){
+
 }
 
 QString DeviceService::getVideoPath()
@@ -23,6 +24,9 @@ QString DeviceService::getPicturePath()
 
 void DeviceService::setVideoPath(const QString *VideoPath)
 {
+    // 清空当前视频路径
+    this->VideoPath.clear();
+
     // 检查指针是否为空，并设置视频路径
     if (VideoPath != nullptr)
     {
@@ -37,6 +41,9 @@ void DeviceService::setVideoPath(const QString *VideoPath)
 
 void DeviceService::setPicturePath(const QString *PicturePath)
 {
+    // 清空当前图片路径
+    this->PicturePath.clear();
+
     // 检查指针是否为空，并设置图片路径
     if (PicturePath != nullptr)
     {
