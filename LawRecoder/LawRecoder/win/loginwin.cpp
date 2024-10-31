@@ -1,3 +1,4 @@
+#include "indexwin.h"
 #include "loginwin.h"
 
 #include <QMessageBox>
@@ -146,8 +147,9 @@ void LoginWin::BtnClicked()
     } else if (clickedButton == btnCancel) {
         // 输出取消登录操作的调试信息
         qDebug() << "[DEBUG] Login canceled.";
-        // 关闭窗口
-        close();
+        IndexWin* indexWindow = new IndexWin();
+        indexWindow->show();  // 显示主界面
+        this->close();  // 关闭设置窗口
     }
 }
 

@@ -10,7 +10,7 @@
 #include <QWidget>
 #include <QString>
 #include <QMessageBox>
-
+#include "../common/singleton.h"
 /**
  * @class SettingWin
  * @brief 系统设置窗口类，负责显示和处理系统设置界面
@@ -18,13 +18,13 @@
 class SettingWin : public QWidget
 {
     Q_OBJECT
-
+    SINGLETON(SettingWin)
 public:
-    /**
-     * @brief 构造函数，初始化设置窗口
-     * @param parent 父窗口指针，默认为 nullptr
-     */
-    explicit SettingWin(QWidget *parent = nullptr);
+//    /**
+//     * @brief 构造函数，初始化设置窗口
+//     * @param parent 父窗口指针，默认为 nullptr
+//     */
+//    explicit SettingWin(QWidget *parent = nullptr);
 
     /**
      * @brief 设置 UI 界面布局

@@ -9,12 +9,17 @@
 #include "../common/singleton.h"
 #include "../common/VideoCaptureThread.h"
 #include "../common/VideoSaveThread.h"
+#include "loginwin.h"
+#include "settingwin.h"
+#include "videocapturewin.h"
+#include "imagecapturewin.h"
 // 前向声明
 class CameraCapture;
 
 class IndexWin : public QWidget
 {
     Q_OBJECT
+
 private:
     // 设置 UI 界面
     void setUi();
@@ -47,7 +52,10 @@ private:
     QGridLayout *glay;          // 网格布局
     QImage img;                 // 接收到的摄像头图像
     CameraCapture *cameraCapture; // 摄像头捕获类实例
-
+    ImageCaptureWin *image = nullptr;
+    SettingWin      *set   = nullptr;
+    LoginWin        *login = nullptr;
+    VideoCaptureWin *video = nullptr;
     void captureScreenshot();
 public:
     explicit IndexWin(QWidget *parent = nullptr);

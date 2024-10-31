@@ -3,13 +3,16 @@
 #include "../controller/settingcontroller.h"
 #include "../common/singleton.h"
 #include "../service/deviceservice.h"
-SettingWin::SettingWin(QWidget *parent) : QWidget(parent)
+SettingWin::SettingWin()
 {
     // 初始化界面和信号连接
     setUi();
     connectSignals();
 }
+SettingWin::~SettingWin()
+{
 
+}
 /**
  * @brief 设置界面布局及控件
  */

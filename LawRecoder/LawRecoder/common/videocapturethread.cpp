@@ -77,10 +77,9 @@ void VideoCaptureThread::run() {
 
 
 void VideoCaptureThread::captureScreenshot() {
-    // 加锁确保摄像头的独占访问,不然获取不到帧
+    // 加锁确保摄像头的独占访问
     QMutexLocker locker(&frameMutex);
     if (!cap.isOpened()) {
-        // 因为摄像头一直被播放线程占用，实际仍然可以拿到
         qWarning("Camera not open. Attempting to reopen...");
         if (!cap.open(0)) {
             qWarning("Failed to reopen camera for screenshot.");
@@ -92,19 +91,19 @@ void VideoCaptureThread::captureScreenshot() {
     cap >> frame;
     if (frame.empty()) {
         qWarning("Failed to capture screenshot - empty frame.");
-        
-        // 如果未能捕获到有效的帧，则准备 PictureDao 对象并写入 NULL
+
+        // 没有有效帧时写入默认的 NULL 数据
         PictureDao picture;
-        picture.setPictureName("NULL"); // 使用 setter 方法
-            picture.setPictureAddress("NULL"); // 根据实际需要填入
-            picture.setPictureDate("NULL"); // 可以根据需要修改
-            picture.setPictureUser("NULL"); // 可以根据需要修改
-            picture.setPictureType(0); // 或者根据实际情况填入
-            picture.setPicturePath("NULL"); // 图片路径为 NULL
+        picture.setPictureName("NULL");
+        picture.setPictureAddress("NULL");
+        picture.setPictureDate("NULL");
+        picture.setPictureUser("NULL");
+        picture.setPictureType(0);
+        picture.setPicturePath("NULL");
 
         SaveVideoAndPictureService service;
-        service.insertPictureInfo(picture); // 写入数据库
-        return; // 返回
+        service.insertPictureInfo(picture);
+        return;
     }
 
     // 转换颜色格式并保存图像
@@ -113,24 +112,30 @@ void VideoCaptureThread::captureScreenshot() {
     QImage img((uchar*)rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step, QImage::Format_RGB888);
 
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
-    QString picturePath = QDir::cleanPath(Singleton<DeviceService>::getInstance().getPicturePath() + "/" + timestamp + ".jpg");
+    QString picturePath = Singleton<DeviceService>::getInstance().getPicturePath();
 
+    // 检查 picturePath 是否为空，如果为空则使用默认路径
+    if (picturePath.isEmpty()) {
+        picturePath = QDir::homePath() + "/Pictures"; // 默认保存路径，例如用户主目录下的 Pictures 文件夹
+        QDir().mkpath(picturePath); // 如果目录不存在则创建
+    }
 
-    if (img.save(picturePath, "JPEG")) {
-        qDebug() << "Screenshot saved at:" << picturePath;
+    QString outfile = QDir::cleanPath(picturePath + "/" + timestamp + ".jpg");
+
+    if (img.save(outfile, "JPEG")) {
+        qDebug() << "Screenshot saved at:" << outfile;
 
         // 成功保存截图，准备 PictureDao 对象并写入数据库
         PictureDao picture;
-        picture.setPictureName(timestamp); // 使用 setter 方法设置值
-        picture.setPictureAddress("null"); // 保存的文件路径
-        picture.setPictureDate(QDateTime::currentDateTime().toString("yyyy-MM-dd")); // 记录当前日期
-        picture.setPictureUser("User"); // 根据实际需要填入
-        picture.setPictureType(1); // 或者根据实际情况填入
-        picture.setPicturePath(picturePath); // 图片路径也进行修改
+        picture.setPictureName(timestamp);
+        picture.setPictureAddress("null");
+        picture.setPictureDate(QDateTime::currentDateTime().toString("yyyy-MM-dd"));
+        picture.setPictureUser("User");
+        picture.setPictureType(1);
+        picture.setPicturePath(outfile);
 
         SaveVideoAndPictureService service;
-        service.insertPictureInfo(picture); // 写入数据库
-
+        service.insertPictureInfo(picture);
     } else {
         qDebug() << "Failed to save screenshot.";
     }

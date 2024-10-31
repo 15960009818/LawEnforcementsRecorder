@@ -8,6 +8,7 @@ VideoCaptureWin::VideoCaptureWin(QWidget *parent)
 {
     setUi();            // 设置UI界面
     connectSignals();   // 连接信号和槽
+    qDebug()<<"[INFO] VideoCaptureWin Initializing Success";
 }
 
 void VideoCaptureWin::setUi()
