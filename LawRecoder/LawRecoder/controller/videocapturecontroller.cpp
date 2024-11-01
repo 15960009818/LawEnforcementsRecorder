@@ -18,7 +18,9 @@ VideoCaptureController::~VideoCaptureController() {
 void VideoCaptureController::initController() {
     qRegisterMetaType<QList<VideoDao>>("QList<VideoDao>");
 
-    connect(this,SIGNAL(getSignal(QDate,int)),this,SLOT(getVideoMessageSlot(QDate,int)));
+    bool connected =connect(this, &VideoCaptureController::dateSignal, this, &VideoCaptureController::getVideoMessageSlot);
+
+    qDebug() << "[DEBUG] Signal-slot connection success:" << connected;
     connect(this, SIGNAL(finishedVideoQuerySignal(int, const QList<VideoDao>&)),
             this, SLOT(sendVideoMessageSlot(int, const QList<VideoDao>&)));
 }

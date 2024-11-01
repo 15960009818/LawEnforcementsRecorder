@@ -1,6 +1,9 @@
 #include "videoplayer.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPushButton>
+#include <QLabel>
+#include <QSlider>
 #include <QDebug>
 #include <QImage>
 #include <QPixmap>
@@ -20,6 +23,7 @@ VideoPlayer::VideoPlayer(VideoCaptureWin *videoCaptureWin, QWidget *parent)
     videoLabel->setAlignment(Qt::AlignCenter);
 
     playButton = new QPushButton("Play", this);
+    QPushButton *backButton = new QPushButton("Back", this); // 添加返回按钮
     slider = new QSlider(Qt::Horizontal, this);
     slider->setRange(0, totalFrames - 1);
 
@@ -27,6 +31,7 @@ VideoPlayer::VideoPlayer(VideoCaptureWin *videoCaptureWin, QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QHBoxLayout *controlLayout = new QHBoxLayout;
     controlLayout->addWidget(playButton);
+    controlLayout->addWidget(backButton); // 添加返回按钮到布局
     controlLayout->addWidget(slider);
 
     mainLayout->addWidget(videoLabel);
@@ -37,6 +42,7 @@ VideoPlayer::VideoPlayer(VideoCaptureWin *videoCaptureWin, QWidget *parent)
     connect(playButton, &QPushButton::clicked, this, &VideoPlayer::playPause);
     connect(slider, &QSlider::sliderMoved, this, &VideoPlayer::sliderMoved);
     connect(videoThread, &VideoThread::dataSend2UI, this, &VideoPlayer::updateSlider);
+    connect(backButton, &QPushButton::clicked, this, &VideoPlayer::goBack); // 连接返回按钮
 
     qDebug() << "VideoPlayer initialized successfully.";
 }
@@ -93,4 +99,12 @@ void VideoPlayer::updateSlider(int frame, const cv::Mat &frameData) {
 void VideoPlayer::sliderMoved(int position) {
     qDebug() << "Slider moved to position:" << position;
     videoThread->seekToFrame(position);  // 定位到指定帧
+}
+
+// 实现返回操作的槽函数
+void VideoPlayer::goBack() {
+    qDebug() << "Going back to the previous screen.";
+    VideoCaptureWin *video = new VideoCaptureWin;
+    video->show();
+    this->hide();
 }

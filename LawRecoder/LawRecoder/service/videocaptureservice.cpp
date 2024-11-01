@@ -30,7 +30,7 @@ void VideoCaptureService::GetDateVideoSlots(const QDate &date, const int &page) 
 
     const char *sql = "SELECT video_id, video_name, video_address, video_date, video_user, video_type, video_path "
                       "FROM video "
-                      "WHERE video_date = ? AND video_type = 1 "
+                      "WHERE video_date >= ? AND video_date < ? AND video_type = 1 "
                       "LIMIT ? OFFSET ?";
 
     // 准备 SQL 语句
@@ -42,12 +42,13 @@ void VideoCaptureService::GetDateVideoSlots(const QDate &date, const int &page) 
         return;
     }
 
-    // 绑定日期参数
-    sqlite3_bind_text(stmt, 1, date.toString("yyyy-MM-dd").toUtf8().constData(), -1, SQLITE_STATIC);
-    // 绑定 LIMIT 参数 (itemsPerPage 固定为 4)
-    sqlite3_bind_int(stmt, 2, itemsPerPage);
+    // 绑定日期范围参数
+    sqlite3_bind_text(stmt, 1, date.toString("yyyy-MM-dd 00:00:00").toUtf8().constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, date.toString("yyyy-MM-dd 23:59:59").toUtf8().constData(), -1, SQLITE_STATIC);
+    // 绑定 LIMIT 参数
+    sqlite3_bind_int(stmt, 3, itemsPerPage);
     // 绑定 OFFSET 参数
-    sqlite3_bind_int(stmt, 3, offset);
+    sqlite3_bind_int(stmt, 4, offset);
 
     QList<VideoDao> videos; // 用于存储查询结果
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
@@ -80,3 +81,4 @@ void VideoCaptureService::GetDateVideoSlots(const QDate &date, const int &page) 
     // 关闭数据库
     sqlite3_close(db);
 }
+

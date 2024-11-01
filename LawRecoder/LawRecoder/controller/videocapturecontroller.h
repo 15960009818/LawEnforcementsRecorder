@@ -5,8 +5,8 @@
 #include <QDate>
 #include <QList>
 #include <QThread>
-#include "../dao/videodao.h" // 假设你有一个用于视频信息的类
-#include "../service/videocaptureService.h" // 视频捕获服务的类
+#include "../dao/videodao.h"
+#include "../service/videocaptureService.h"
 #include "../common/singleton.h"
 class VideoCaptureController : public QObject {
     Q_OBJECT

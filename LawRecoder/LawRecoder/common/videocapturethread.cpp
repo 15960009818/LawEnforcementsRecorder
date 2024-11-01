@@ -79,9 +79,11 @@ void VideoCaptureThread::run() {
 void VideoCaptureThread::captureScreenshot() {
     // 加锁确保摄像头的独占访问
     QMutexLocker locker(&frameMutex);
-    if (!cap.isOpened()) {
+    if (!cap.isOpened())
+    {
         qWarning("Camera not open. Attempting to reopen...");
-        if (!cap.open(0)) {
+        if (!cap.open(0))
+        {
             qWarning("Failed to reopen camera for screenshot.");
             return;
         }
@@ -135,7 +137,11 @@ void VideoCaptureThread::captureScreenshot() {
         picture.setPicturePath(outfile);
 
         SaveVideoAndPictureService service;
-        service.insertPictureInfo(picture);
+        bool insertPicture =  service.insertPictureInfo(picture);
+        if(!insertPicture)
+        {
+            qDebug()<<"[ERROR] insert picture error";
+        }
     } else {
         qDebug() << "Failed to save screenshot.";
     }

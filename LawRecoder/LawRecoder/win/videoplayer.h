@@ -18,6 +18,8 @@ public:
     explicit VideoPlayer(VideoCaptureWin *videoCaptureWin, QWidget *parent = nullptr);
     ~VideoPlayer();
 
+protected slots:
+    void goBack();
 private slots:
     void playVideo(const QString &videoPath);
     void playPause();           // 控制播放/暂停

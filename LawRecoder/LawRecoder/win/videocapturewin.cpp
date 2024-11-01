@@ -173,5 +173,6 @@ void VideoCaptureWin::BtnClicked()
         QString formattedDate = selectedDate.toString("yyyy-MM-dd");
         qDebug() << "日期更改：" << formattedDate;
         emit Singleton<VideoCaptureController>::getInstance().dateSignal(selectedDate, page);
+        qDebug() << "[DEBUG] Signal getSignal emitted.";
     }
 }
