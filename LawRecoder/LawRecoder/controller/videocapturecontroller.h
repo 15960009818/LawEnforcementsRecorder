@@ -5,8 +5,8 @@
 #include <QDate>
 #include <QList>
 #include <QThread>
-#include "../dao/videodao.h"
-#include "../service/videocaptureService.h"
+#include "../dao/videodao.h" // 假设你有一个用于视频信息的类
+#include "../service/videocaptureservice.h" // 视频捕获服务的类
 #include "../common/singleton.h"
 class VideoCaptureController : public QObject {
     Q_OBJECT
@@ -18,7 +18,7 @@ public:
 private:
     void initController(); // 初始化控制器
 
-private slots:
+public slots:
     void getVideoMessageSlot(QDate videoDate, int row); // 获取视频消息的槽函数
     void sendVideoMessageSlot(int SQLRESULT, const QList<VideoDao> &videoMessage); // 发送视频消息的槽函数
 

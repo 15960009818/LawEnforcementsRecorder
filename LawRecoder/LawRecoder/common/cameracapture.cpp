@@ -1,10 +1,13 @@
 // CameraCapture.cpp
-#include "CameraCapture.h"
+#include "cameracapture.h"
+
 
 CameraCapture::CameraCapture(QObject *parent)
     : QObject(parent), timer(new QTimer(this)) {
     connect(timer, &QTimer::timeout, this, &CameraCapture::captureFrame);
 }
+
+
 
 CameraCapture::~CameraCapture() {
     stopCapture();

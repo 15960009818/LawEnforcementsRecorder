@@ -3,22 +3,25 @@
 
 #include <QObject>
 #include <QString>
-#include <QList>
-#include <QDebug>
-#include "../sqlite3.h"
+#include <QSqlDatabase>
 #include "../dao/videodao.h"
 #include "../dao/picturedao.h"
+
 class SaveVideoAndPictureService : public QObject
 {
     Q_OBJECT
 public:
     explicit SaveVideoAndPictureService(QObject *parent = nullptr);
 
-     bool insertVideoInfo(const VideoDao& video);
-     bool insertPictureInfo(const PictureDao& picture);
+    // 插入视频信息
+    bool insertVideoInfo(const VideoDao& video);
+
+    // 插入图片信息
+    bool insertPictureInfo(const PictureDao& picture);
+
 private:
-    bool openDatabase(sqlite3 *&db); // 数据库打开辅助函数
-    
+    // 创建数据库连接
+    QSqlDatabase createDatabaseConnection();
 };
 
 #endif // SAVEVIDEOANDPICTURESERVICE_H

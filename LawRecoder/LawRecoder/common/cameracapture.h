@@ -11,7 +11,8 @@ class CameraCapture : public QObject {
     Q_OBJECT
 
 public:
-    explicit CameraCapture(QObject *parent = nullptr);
+
+
     ~CameraCapture();
     void startCapture();
     void stopCapture();
@@ -25,6 +26,9 @@ private slots:
 private:
     cv::VideoCapture cap;
     QTimer *timer;
+    explicit CameraCapture(QObject *parent = nullptr);
+
 };
+
 
 #endif // CAMERACAPTURE_H

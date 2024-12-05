@@ -1,6 +1,7 @@
 #include "recordingunit.h"
-#include <QCameraInfo>
+//#include <QCameraInfo>
 #include <QDebug>
+#include <QProcess>
 RecordingUnit::RecordingUnit()
 {
     registerFFmpeg();
@@ -11,24 +12,40 @@ void RecordingUnit::registerFFmpeg()
     av_register_all();
     avdevice_register_all();//注册设备
 }
+
 /**
- * @brief IndexController::getAvailableCameras 获取摄像头名称
- * @return QStringList 所以的摄像头设备
+ * @brief RecordingUnit::getAvailableCameras
+ * @return QStringList 获取系统中可用的摄像头设备名称
  */
 QStringList RecordingUnit::getAvailableCameras()
 {
     QStringList cameraNames;
-    QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    if (cameras.isEmpty()) {
-        qDebug() << "[WARNING] No cameras found!";
-    } else {
-        for (const QCameraInfo &cameraInfo : cameras) {
-            QString cameraName = cameraInfo.deviceName();
-            QString cameraDescription = cameraInfo.description();  // 获取摄像头的描述信息
-            cameraNames.append(cameraDescription);  // 使用 description 来获取摄像头的实际名称
-            qDebug() << "[INFO] Found camera:" << cameraName << ", Description:" << cameraDescription;
+#ifdef Q_OS_LINUX
+    // 使用 v4l2-ctl 命令列出所有摄像头设备
+    QProcess process;
+    process.start("v4l2-ctl --list-devices");
+    process.waitForFinished();
+    QString output = process.readAllStandardOutput();
+
+    QStringList lines = output.split("\n");
+    QString currentCamera;
+    for (const QString &line : lines) {
+        if (line.contains("/dev/video")) {
+            // 提取设备路径
+            currentCamera = line.trimmed();
+            cameraNames.append(currentCamera);
         }
     }
+    if (cameraNames.isEmpty()) {
+        qDebug() << "[WARNING] No cameras found!";
+    } else {
+        for (const QString &camera : cameraNames) {
+            qDebug() << "[INFO] Found camera:" << camera;
+        }
+    }
+#else
+    qDebug() << "[WARNING] This method only supports Linux platform!";
+#endif
     return cameraNames;
 }
 /**

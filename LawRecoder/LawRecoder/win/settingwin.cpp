@@ -176,7 +176,7 @@ void SettingWin::handleSpaceInsufficient(QString errorMsg)
  */
 void SettingWin::BtnOkSlot()
 {
-    IndexWin* indexWindow = new IndexWin();  // 创建主界面窗口
+    IndexWin* indexWindow = IndexWin::getInstance(); // 创建主界面窗口
     indexWindow->show();  // 显示主界面
     this->hide();  // 隐藏设置窗口
     resettingFlag = 1;  // 标记已经进行设置
@@ -188,7 +188,7 @@ void SettingWin::BtnOkSlot()
 void SettingWin::BtnCancelSlot()
 {
     if (resettingFlag == 1) {
-        IndexWin* indexWindow = new IndexWin();
+        IndexWin* indexWindow = IndexWin::getInstance();
         indexWindow->show();  // 显示主界面
         this->close();  // 关闭设置窗口
     } else {

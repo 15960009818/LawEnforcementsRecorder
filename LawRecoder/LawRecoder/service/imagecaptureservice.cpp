@@ -1,11 +1,14 @@
 #include "imagecaptureservice.h"
-#include "../../sqlite3.h"
 #include "../dao/picturedao.h"
 #include "../common/commondefs.h"
 #include "../common/singleton.h"
 #include "../controller/imagecapturecontroller.h"
 #include <QDate>
-#include <QString>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+#include <QDebug>
 
 ImageCaptureService::ImageCaptureService(QObject *parent) : QObject(parent)
 {
@@ -14,16 +17,15 @@ ImageCaptureService::ImageCaptureService(QObject *parent) : QObject(parent)
 // 获取指定日期的图片信息，分页查询，每页 4 条记录
 void ImageCaptureService::GetDateImageSlots(const QDate &date, const int &page)
 {
-    sqlite3 *db = nullptr;
-    sqlite3_stmt *stmt;
-    int rc;
     const int itemsPerPage = 4; // 每页固定返回 4 条记录
     int offset = (page - 1) * itemsPerPage; // 计算偏移量
 
-    // 打开数据库
-    int res = sqlite3_open("data/video.db", &db);
-    if (res != SQLITE_OK) {
-        qDebug() << "Database open error:" << sqlite3_errmsg(db);
+    // 打开数据库连接
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("data/video.db");
+
+    if (!db.open()) {
+        qDebug() << "Database open error:" << db.lastError().text();
         emit Singleton<ImageCaptureController>::getInstance()
                 .finishedImageCaptureSignal(SQLERROR); // 发送错误信号
         return;
@@ -31,61 +33,50 @@ void ImageCaptureService::GetDateImageSlots(const QDate &date, const int &page)
 
     qDebug() << "Database opened successfully!";
 
+    // 准备 SQL 查询语句
+    QSqlQuery query(db);
+    query.prepare("SELECT picture_id, picture_name, picture_address, picture_date, picture_user, picture_type, picture_path "
+                  "FROM picture "
+                  "WHERE picture_date = :date AND picture_type = 1 "
+                  "LIMIT :limit OFFSET :offset");
 
-    const char *sql = "SELECT picture_id, picture_name, picture_address, picture_date, picture_user, picture_type, picture_path "
-                      "FROM picture "
-                      "WHERE picture_date = ? AND picture_type = 1 "
-                      "LIMIT ? OFFSET ?";
-
-    // 准备 SQL 语句
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) {
-        qDebug() << "Failed to prepare statement:" << sqlite3_errmsg(db);
-        sqlite3_close(db);
-        emit Singleton<ImageCaptureController>::getInstance()
-                .finishedImageCaptureSignal(SQLERROR); // 发送错误信号
-        return;
-    }
-
-    // 绑定日期参数
-    sqlite3_bind_text(stmt, 1, date.toString("yyyy-MM-dd").toUtf8().constData(), -1, SQLITE_STATIC);
-    // 绑定 LIMIT 参数 (itemsPerPage 固定为 4)
-    sqlite3_bind_int(stmt, 2, itemsPerPage);
-    // 绑定 OFFSET 参数
-    sqlite3_bind_int(stmt, 3, offset);
+    // 绑定参数
+    query.bindValue(":date", date.toString("yyyy-MM-dd"));
+    query.bindValue(":limit", itemsPerPage);
+    query.bindValue(":offset", offset);
 
     QList<PictureDao> pictures; // 用于存储查询结果
-    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        PictureDao pic;
 
-        // 从数据库查询结果中设置 PictureDao 的字段
-        pic.setPictureId(sqlite3_column_int(stmt, 0));
-        pic.setPictureName(QString::fromUtf8(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1))));
-        pic.setPictureAddress(QString::fromUtf8(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2))));
-        pic.setPictureDate(QString::fromUtf8(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3))));
-        pic.setPictureUser(QString::fromUtf8(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4))));
-        pic.setPictureType(sqlite3_column_int(stmt, 5));
-        pic.setPicturePath(QString::fromUtf8(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6))));
+    // 执行查询
+    if (query.exec()) {
+        while (query.next()) {
+            PictureDao pic;
 
-        // 将 PictureDao 实例添加到列表中
-        pictures.append(pic);
-    }
+            // 从查询结果中提取数据并设置到 PictureDao
+            pic.setPictureId(query.value(0).toInt());
+            pic.setPictureName(query.value(1).toString());
+            pic.setPictureAddress(query.value(2).toString());
+            pic.setPictureDate(query.value(3).toString());
+            pic.setPictureUser(query.value(4).toString());
+            pic.setPictureType(query.value(5).toInt());
+            pic.setPicturePath(query.value(6).toString());
 
-    if (rc != SQLITE_DONE) {
-        qDebug() << "Failed to execute query:" << sqlite3_errmsg(db);
-        emit Singleton<ImageCaptureController>::getInstance()
-                .finishedImageCaptureSignal(SQLERROR); // 发送错误信号
-    } else {
+            // 将 PictureDao 实例添加到列表中
+            pictures.append(pic);
+        }
+
         // 如果成功，发送成功状态和查询结果
         emit Singleton<ImageCaptureController>::getInstance()
                 .finishedPictureQuerySignal(SQLSUCCESS, pictures); // 发送成功信号和图片列表
         qDebug() << "Query successful, found" << pictures.size() << "pictures.";
+    } else {
+        // 如果查询失败，输出错误并发送错误信号
+        qDebug() << "Failed to execute query:" << query.lastError().text();
+        emit Singleton<ImageCaptureController>::getInstance()
+                .finishedImageCaptureSignal(SQLERROR); // 发送错误信号
     }
 
-    // 释放查询语句资源
-    sqlite3_finalize(stmt);
     // 关闭数据库
-    sqlite3_close(db);
+    db.close();
+    QSqlDatabase::removeDatabase("qt_sql_default_connection");
 }
-
-

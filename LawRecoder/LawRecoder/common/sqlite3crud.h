@@ -1,6 +1,15 @@
-#include <QDebug>
+#ifndef SQLITE3CRUD_H
+#define SQLITE3CRUD_H
+
+#include <QVector>
+#include <QMap>
 #include <QString>
-#include "../sqlite3.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlRecord>
+#include <QDebug>
+
 class Sqlite3Crud {
 public:
     Sqlite3Crud();
@@ -15,5 +24,7 @@ public:
     bool remove(const QString &tableName, const QString &whereClause);
 
 private:
-    sqlite3 *db;
+    QSqlDatabase db; // 使用 QSqlDatabase 代替原来的 sqlite3*
 };
+
+#endif // SQLITE3CRUD_H

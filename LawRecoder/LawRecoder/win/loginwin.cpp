@@ -147,7 +147,7 @@ void LoginWin::BtnClicked()
     } else if (clickedButton == btnCancel) {
         // 输出取消登录操作的调试信息
         qDebug() << "[DEBUG] Login canceled.";
-        IndexWin* indexWindow = new IndexWin();
+        IndexWin* indexWindow = IndexWin::getInstance();
         indexWindow->show();  // 显示主界面
         this->close();  // 关闭设置窗口
     }

@@ -4,107 +4,192 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QSlider>
-#include <QDebug>
 #include <QImage>
 #include <QPixmap>
+#include <QDebug>
 
-VideoPlayer::VideoPlayer(VideoCaptureWin *videoCaptureWin, QWidget *parent)
-    : QWidget(parent), isPlaying(false) {
+/**
+ * @brief VideoPlayer 构造函数
+ *
+ * 构造函数用于初始化视频播放器界面，创建视频线程并设置视频播放控制界面元素。
+ * 它还会设置播放按钮、进度条、播放速度下拉框、截图按钮等控件，并将它们布局到界面上。
+ */
+VideoPlayer::VideoPlayer(const QString &videoPath, QWidget *parent)
+    : QWidget(parent), isPlaying(false)
+{
 
-    // 连接信号
-    connect(videoCaptureWin, &VideoCaptureWin::videoSelected, this, &VideoPlayer::playVideo);
+    // 创建视频播放线程并传入视频路径
+    videoThread = new VideoThread(videoPath, this);
 
-    // 初始化 VideoThread 线程
-    videoThread = new VideoThread();
+    // 检查视频是否成功打开
+    if (!videoThread->isOpened())
+    {
+        qDebug() << "Error opening video!";
+        return;
+    }
 
-    // 初始化组件
+    // 获取视频的总帧数
+    totalFrames = videoThread->getTotalFrames();
+
+    // 创建视频显示标签
     videoLabel = new QLabel(this);
-    videoLabel->setFixedSize(380, 400);
+    videoLabel->setFixedSize(640, 480);
     videoLabel->setAlignment(Qt::AlignCenter);
 
+    // 创建播放按钮、进度条、速度选择框和截图按钮
     playButton = new QPushButton("Play", this);
-    QPushButton *backButton = new QPushButton("Back", this); // 添加返回按钮
     slider = new QSlider(Qt::Horizontal, this);
     slider->setRange(0, totalFrames - 1);
 
-    // 布局
+    // 创建速度选择下拉框并添加选项
+    speedComboBox = new QComboBox(this);
+    speedComboBox->addItem("1x");
+    speedComboBox->addItem("2x");
+    speedComboBox->addItem("0.5x");
+
+    // 添加截图按钮
+    screenshotButton = new QPushButton("Screenshot", this);
+
+    // 设置界面布局
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QHBoxLayout *controlLayout = new QHBoxLayout;
     controlLayout->addWidget(playButton);
-    controlLayout->addWidget(backButton); // 添加返回按钮到布局
     controlLayout->addWidget(slider);
+    controlLayout->addWidget(speedComboBox);
+    controlLayout->addWidget(screenshotButton);
 
     mainLayout->addWidget(videoLabel);
     mainLayout->addLayout(controlLayout);
     setLayout(mainLayout);
 
-    // 信号与槽连接
+    // 绑定按钮和槽函数
     connect(playButton, &QPushButton::clicked, this, &VideoPlayer::playPause);
     connect(slider, &QSlider::sliderMoved, this, &VideoPlayer::sliderMoved);
     connect(videoThread, &VideoThread::dataSend2UI, this, &VideoPlayer::updateSlider);
-    connect(backButton, &QPushButton::clicked, this, &VideoPlayer::goBack); // 连接返回按钮
+    connect(videoThread, &VideoThread::finishedPlaying, this, &VideoPlayer::finishedPlaying);
+    connect(speedComboBox,
+            static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+            this,
+            &VideoPlayer::changeSpeed);
+
+    connect(screenshotButton, &QPushButton::clicked, this, &VideoPlayer::onScreenshotButtonClicked);
 
     qDebug() << "VideoPlayer initialized successfully.";
+
+    // 启动视频播放线程
+    videoThread->start();
 }
 
-VideoPlayer::~VideoPlayer() {
-    qDebug() << "Stopping video thread...";
+/**
+ * @brief VideoPlayer 析构函数
+ *
+ * 析构函数会停止并销毁视频播放线程。
+ */
+VideoPlayer::~VideoPlayer()
+{
     videoThread->stop();  // 停止视频线程
-    videoThread->wait();  // 确保线程结束
-    delete videoThread;
-    qDebug() << "Video thread stopped and deleted.";
+    videoThread->wait();  // 等待视频线程结束
+    delete videoThread;   // 删除视频线程对象
 }
 
-void VideoPlayer::playVideo(const QString &videoPath) {
-    qDebug() << "Playing video from path:" << videoPath;
-
-    videoThread->setVideoPath(videoPath);  // 设置视频路径
-    videoThread->start();  // 启动视频线程
-
-    // 获取视频总帧数
-    totalFrames = videoThread->getCount();
-    slider->setRange(0, totalFrames - 1);
-}
-
-void VideoPlayer::playPause() {
-    if (isPlaying) {
-        playButton->setText("Play");
-        qDebug() << "Pausing video...";
-        videoThread->pause();  // 暂停线程
-    } else {
-        playButton->setText("Pause");
-        qDebug() << "Resuming video...";
-        videoThread->resume();  // 恢复线程
+/**
+ * @brief 播放/暂停按钮的槽函数
+ *
+ * 该函数根据当前播放状态切换播放按钮的文本，并控制视频线程的播放或暂停。
+ */
+void VideoPlayer::playPause()
+{
+    if (isPlaying)
+    {
+        playButton->setText("Play");  // 如果正在播放，设置按钮文本为 "Play"
+        videoThread->pause();         // 暂停视频播放
     }
-    isPlaying = !isPlaying;
+    else
+    {
+        playButton->setText("Pause"); // 如果暂停，设置按钮文本为 "Pause"
+        videoThread->resume();        // 恢复视频播放
+    }
+    isPlaying = !isPlaying;  // 切换播放状态
 }
 
-void VideoPlayer::updateSlider(int frame, const cv::Mat &frameData) {
-    // 更新进度条
-    slider->setValue(frame);
-    qDebug() << "Updating slider to frame:" << frame;
+/**
+ * @brief 更新进度条
+ *
+ * 该函数会在接收到视频帧时更新进度条的值，并在界面上显示当前帧。
+ *
+ * @param frame 当前帧的帧号
+ * @param frameData 当前帧的数据
+ */
+void VideoPlayer::updateSlider(int frame, const cv::Mat &frameData)
+{
+    qDebug() << "Received frame:" << frame;
+    slider->setValue(frame);  // 更新进度条的值
 
-    // 更新视频显示
-    if (!frameData.empty()) {
+    if (!frameData.empty())
+    {
+        // 将 BGR 格式的图像转换为 RGB 格式以便显示
         cv::Mat rgbFrame;
-        cv::cvtColor(frameData, rgbFrame, cv::COLOR_BGR2RGB);  // 转换颜色格式
-        QImage qimg(rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step[0], QImage::Format_RGB888);  // 确保 QImage 格式正确
-        videoLabel->setPixmap(QPixmap::fromImage(qimg));  // 显示图像
-        qDebug() << "Frame displayed on UI.";
-    } else {
+        cv::cvtColor(frameData, rgbFrame, cv::COLOR_BGR2RGB);
+
+        // 创建 QImage 用于显示
+        QImage qimg(rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step[0], QImage::Format_RGB888);
+        videoLabel->setPixmap(QPixmap::fromImage(qimg));
+    }
+    else
+    {
         qDebug() << "Empty frame received!";
     }
 }
 
-void VideoPlayer::sliderMoved(int position) {
-    qDebug() << "Slider moved to position:" << position;
-    videoThread->seekToFrame(position);  // 定位到指定帧
+/**
+ * @brief 进度条移动事件的槽函数
+ *
+ * 该函数在进度条移动时被调用，用于让视频播放线程跳转到指定帧。
+ *
+ * @param position 当前进度条的位置
+ */
+void VideoPlayer::sliderMoved(int position)
+{
+    videoThread->seekToFrame(position);
 }
 
-// 实现返回操作的槽函数
-void VideoPlayer::goBack() {
-    qDebug() << "Going back to the previous screen.";
-    VideoCaptureWin *video = new VideoCaptureWin;
-    video->show();
-    this->hide();
+/**
+ * @brief 播放结束后的槽函数
+ *
+ * 该函数在视频播放结束后被调用，重置播放按钮并将进度条设置为0。
+ */
+void VideoPlayer::finishedPlaying()
+{
+    isPlaying = false;
+    playButton->setText("Play");
+    slider->setValue(0);          // 重置进度条为0
+}
+
+/**
+ * @brief 变更播放速度的槽函数
+ *
+ * 该函数根据选择的速度选项调整视频的播放速度。
+ *
+ * @param index 当前选择的速度索引
+ */
+void VideoPlayer::changeSpeed(int index)
+{
+    double speedFactor = 1.0;
+    switch (index)
+    {
+        case 1: speedFactor = 2.0; break;  // 2x速度
+        case 2: speedFactor = 0.5; break;  // 0.5x速度
+        default: speedFactor = 1.0; break; // 默认1x速度
+    }
+    videoThread->setSpeedFactor(speedFactor);  // 设置视频线程的播放速度
+}
+
+/**
+ * @brief 截图按钮点击事件的槽函数
+ *
+ * 该函数在点击截图按钮时触发，通知视频线程进行截图操作。
+ */
+void VideoPlayer::onScreenshotButtonClicked()
+{
+    videoThread->screenshotRequested = true;  // 截图请求
 }

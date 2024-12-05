@@ -1,13 +1,22 @@
 #include "imagecapturewin.h"
+#include "imagedetialwin.h"
 #include "indexwin.h"
 #include "../common/singleton.h"
 #include "../controller/imagecapturecontroller.h"
 #include <QMessageBox>
 ImageCaptureWin::ImageCaptureWin(QWidget *parent)
+    : QWidget(parent) // 确保调用父类构造函数
 {
     setUi();            // 设置UI界面
     connectSignals();    // 连接信号和槽
+
+    // 设置为当前日期
+    selectedDate = QDate::currentDate();
+    editdatetime->setDate(selectedDate); // 将日期编辑器设置为当前日期
+    page = 1; // 重置页数
+    emit Singleton<ImageCaptureController>::getInstance().dateSignal(selectedDate, page); // 发出信号查询当天的图片记录
 }
+
 
 void ImageCaptureWin::setUi()
 {
@@ -135,38 +144,58 @@ void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList
             // 创建一个 QWidget 作为 QListWidgetItem 的内容
             QWidget *itemWidget = new QWidget();
             QHBoxLayout *layout = new QHBoxLayout(itemWidget);
-
-            // 设置布局间距和边距
             layout->setContentsMargins(5, 5, 5, 5);
             layout->setSpacing(10);
 
-            // 图片标签，占左侧 1/4
-            QLabel *iconLabel = new QLabel();
+            // 图片按钮，占左侧 1/4
+            QPushButton *pictureButton = new QPushButton();
             QPixmap pixmap(picture.getPicturePath());
-
-            // 检查图标是否加载成功
             if (!pixmap.isNull()) {
-                iconLabel->setPixmap(pixmap.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                pictureButton->setIcon(QIcon(pixmap.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
             } else {
                 qDebug() << "Warning: Failed to load image icon for path:" << picture.getPicturePath();
             }
+            pictureButton->setIconSize(QSize(50, 50)); // 设置按钮的图标大小
+            pictureButton->setText(picture.getPictureName()); // 可选：显示图片名称
+            layout->addWidget(pictureButton, 1);
 
-            layout->addWidget(iconLabel, 1); // 占1份宽度
-
-//            // 名称标签，占右侧 1/4
-//            QLabel *nameLabel = new QLabel(picture.getPictureName());
-//            layout->addWidget(nameLabel, 1);
-            // 日期标签，占2/4
+            // 图片日期，占2/4
             QLabel *dateLabel = new QLabel(picture.getPictureDate());
-            layout->addWidget(dateLabel,2);
+            layout->addWidget(dateLabel, 2);
 
+            // 上传按钮
+            QPushButton *uploadButton = new QPushButton("上传");
+            layout->addWidget(uploadButton, 1);
+             uploadButton->setProperty("picturePath", picture.getPicturePath());
+             // 连接上传按钮信号到槽函数
+             connect(uploadButton, &QPushButton::clicked, this, [this, uploadButton]() {
+                     QString picturePath = uploadButton->property("picturePath").toString();
+                     openUploadWindow(picturePath);
+             });
             itemWidget->setLayout(layout);
 
             // 创建 QListWidgetItem 并将自定义 QWidget 设置为其内容
             QListWidgetItem *item = new QListWidgetItem();
-            item->setSizeHint(itemWidget->sizeHint()); // 设置项目大小
+            item->setSizeHint(itemWidget->sizeHint());
             videowins->addItem(item);
-            videowins->setItemWidget(item, itemWidget); // 将 QWidget 作为内容设置
+            videowins->setItemWidget(item, itemWidget);
+
+            // 连接按钮点击信号到槽函数
+            connect(pictureButton, &QPushButton::clicked, [=]() {
+                // 发出信号的同时，直接在按钮点击时显示图片详情页面
+                emit pictureClicked(picture); // 发出信号，传递图片数据
+
+                qDebug() << "图片按钮被点击，路径：" << picture.getPicturePath()
+                         << "名称：" << picture.getPictureName();
+
+                // 创建并显示图片详情页面
+                ImageDetailWin *detailWindow = new ImageDetailWin(picture);  // 传递图片对象
+                detailWindow->show();  // 显示详情窗口
+
+                // 可选: 关闭当前窗口或其他处理
+                this->close(); // 如果点击图片按钮时想要关闭当前页面，取消这一行如果不需要
+            });
+
         }
     } else if (message.contains("查询失败")) {
         QMessageBox::warning(this, "Query Error", message);
@@ -177,14 +206,13 @@ void ImageCaptureWin::onFinishedPictureQuery(const QString &message, const QList
     }
 }
 
-
 void ImageCaptureWin::BtnClicked()
 {
     QObject* obj = sender();  // 获取发出信号的对象
 
     if (obj == TlBtnReturn) {
         qDebug() << "返回按钮点击";
-        IndexWin* indexWindow = new IndexWin();  // 创建主界面窗口
+        IndexWin* indexWindow =IndexWin::getInstance();  // 创建主界面窗口
         indexWindow->show();  // 显示主界面
         this->hide();  // 隐藏设置窗口
     } else if (obj == BtnReturnList) {
@@ -208,4 +236,9 @@ void ImageCaptureWin::BtnClicked()
         emit Singleton<ImageCaptureController>::getInstance().dateSignal(selectedDate,page);
 
     }
+}
+void ImageCaptureWin::openUploadWindow(const QString &filePath) {
+    FileTransWin *uploadWindow = new FileTransWin(); // 打开上传窗口
+    uploadWindow->setFilePath(filePath);                 // 设置文件路径
+    uploadWindow->show();                                // 显示窗口
 }

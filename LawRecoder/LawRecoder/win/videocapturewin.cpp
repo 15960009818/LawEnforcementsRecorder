@@ -1,14 +1,28 @@
 #include "videocapturewin.h"
 #include "indexwin.h"
+#include "videoplayer.h"
 #include "../common/singleton.h"
 #include "../controller/videocapturecontroller.h"
 #include <QMessageBox>
 #include <QListWidgetItem>
-
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QHttpMultiPart>
+#include <QFile>
+#include <QFileInfo>
+#include <QMimeDatabase>
+#include <QProgressDialog>
 VideoCaptureWin::VideoCaptureWin(QWidget *parent)
 {
     setUi();            // 设置UI界面
     connectSignals();   // 连接信号和槽
+
+    selectedDate = QDate::currentDate();
+    editdatetime->setDate(selectedDate);
+    page = 1;
+    emit Singleton<VideoCaptureController>::getInstance().dateSignal(selectedDate,page);
     qDebug() << "[INFO] VideoCaptureWin Initializing Success";
 }
 
@@ -66,6 +80,7 @@ void VideoCaptureWin::setUi()
     videowins->setWrapping(true);
     videowins->setIconSize(QSize(140, 100));
 
+
     BtnMore = new QPushButton("查看更多");
 
     // 布局
@@ -107,11 +122,13 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
                      << ", Date:" << video.getVideoDate()
                      << ", Path:" << video.getVideoPath();
 
+            // 创建视频项的 QWidget
             QWidget *itemWidget = new QWidget();
             QHBoxLayout *layout = new QHBoxLayout(itemWidget);
             layout->setContentsMargins(5, 5, 5, 5);
             layout->setSpacing(10);
 
+            // 视频缩略图
             QLabel *iconLabel = new QLabel();
             QPixmap pixmap(video.getVideoPath());
 
@@ -122,11 +139,22 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
             }
             layout->addWidget(iconLabel, 1);
 
+            // 视频名称
             QLabel *nameLabel = new QLabel(video.getVideoName());
             layout->addWidget(nameLabel, 3);
 
-            itemWidget->setLayout(layout);
+            // 上传按钮
+            QPushButton *uploadButton = new QPushButton("上传");
+            layout->addWidget(uploadButton, 1);
+             uploadButton->setProperty("videoPath", video.getVideoPath());
+             // 连接上传按钮信号到槽函数
+             connect(uploadButton, &QPushButton::clicked, this, [this, uploadButton]() {
+                     QString videoPath = uploadButton->property("videoPath").toString();
+                     openUploadWindow(videoPath);
+             });
+             itemWidget->setLayout(layout);
 
+            // 添加到 QListWidget
             QListWidgetItem *item = new QListWidgetItem();
             item->setSizeHint(itemWidget->sizeHint());
             videowins->addItem(item);
@@ -136,12 +164,17 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
             item->setData(Qt::UserRole, video.getVideoPath());
         }
 
-        // 连接信号
+        // 连接信号以选择视频
         connect(videowins, &QListWidget::itemClicked, [this](QListWidgetItem *item) {
             QString videoPath = item->data(Qt::UserRole).toString();
-            emit videoSelected(videoPath); // 发射信号以选择视频
+
+            videoPlayer = new VideoPlayer(videoPath);
+            videoPlayer->playPause();
+            videoPlayer->show();
+
             qDebug() << "Selected video path:" << videoPath;
         });
+
     } else if (message.contains("查询失败")) {
         QMessageBox::warning(this, "Query Error", message);
         qDebug() << "Query failed with message:" << message;
@@ -151,14 +184,13 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
     }
 }
 
-
 void VideoCaptureWin::BtnClicked()
 {
     QObject* obj = sender();
 
     if (obj == TlBtnReturn) {
         qDebug() << "返回按钮点击";
-        IndexWin* indexWindow = new IndexWin();
+        IndexWin* indexWindow = IndexWin::getInstance();
         indexWindow->show();
         this->hide();
     } else if (obj == BtnReturnList) {
@@ -173,6 +205,11 @@ void VideoCaptureWin::BtnClicked()
         QString formattedDate = selectedDate.toString("yyyy-MM-dd");
         qDebug() << "日期更改：" << formattedDate;
         emit Singleton<VideoCaptureController>::getInstance().dateSignal(selectedDate, page);
-        qDebug() << "[DEBUG] Signal getSignal emitted.";
     }
+}
+
+void VideoCaptureWin::openUploadWindow(const QString &filePath) {
+    FileTransWin *uploadWindow = new FileTransWin(); // 打开上传窗口
+    uploadWindow->setFilePath(filePath);                 // 设置文件路径
+    uploadWindow->show();                                // 显示窗口
 }

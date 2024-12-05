@@ -1,5 +1,5 @@
 #include "indexcontroller.h"
-#include <QCameraInfo>
+//#include <QCameraInfo>
 #include <QStringList>
 IndexController::IndexController()
 {

@@ -5,10 +5,11 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QGridLayout>
+#include <QPointer>
 #include "../controller/indexcontroller.h"
 #include "../common/singleton.h"
-#include "../common/VideoCaptureThread.h"
-#include "../common/VideoSaveThread.h"
+#include "../common/videocapturethread.h"
+#include "../common/videosavethread.h"
 #include "loginwin.h"
 #include "settingwin.h"
 #include "videocapturewin.h"
@@ -52,15 +53,19 @@ private:
     QGridLayout *glay;          // 网格布局
     QImage img;                 // 接收到的摄像头图像
     CameraCapture *cameraCapture; // 摄像头捕获类实例
-    ImageCaptureWin *image = nullptr;
-    SettingWin      *set   = nullptr;
-    LoginWin        *login = nullptr;
-    VideoCaptureWin *video = nullptr;
+    // 使用智能指针替代裸指针，避免内存泄漏
+    QPointer<ImageCaptureWin> image;  // 图像查看窗口（使用 QPointer）
+    QPointer<SettingWin> set;         // 设置窗口（使用 QPointer）
+    QPointer<LoginWin> login;         // 登录窗口（使用 QPointer）
+    QPointer<VideoCaptureWin> video;  // 视频回放窗口（使用 QPointer）
     void captureScreenshot();
+     static IndexWin *instance;
+     explicit IndexWin(QWidget *parent = nullptr);
+      ~IndexWin();
 public:
-    explicit IndexWin(QWidget *parent = nullptr);
-    ~IndexWin();
 
+
+    static IndexWin *getInstance(QWidget *parent = nullptr);
     // 绘制界面图像
     void paintEvent(QPaintEvent *event) override;
 

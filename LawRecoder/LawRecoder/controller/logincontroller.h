@@ -19,14 +19,14 @@ signals:
 public:
     void initController();
 
-    int getLoginFlag() const;
-    void setLoginFlag(int flag);
+    static int getLoginFlag() ;
+    static void setLoginFlag(int flag);
 
 public slots:
         void LoginCheckSlots(const QString& userAccount, const QString& userPassword, const QString& inputVerificationCode, const QString& generatedVerificationCode);
 
 private:
-        int loginflag;
+        static int loginflag;
         QThread *threadLoginCheck;
         LoginService *loginService;
 private slots:

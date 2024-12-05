@@ -1,87 +1,97 @@
 #include "savevideoandpictureservice.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+#include <QDebug>
+#include <QThread>
 
-SaveVideoAndPictureService::SaveVideoAndPictureService(QObject *parent) 
-    : QObject(parent) 
+SaveVideoAndPictureService::SaveVideoAndPictureService(QObject *parent)
+    : QObject(parent)
 {
 }
 
-bool SaveVideoAndPictureService::openDatabase(sqlite3 *&db) {
-    int rc = sqlite3_open("data/video.db", &db); 
-    if (rc) {
-        qDebug() << "Can't open database:" << sqlite3_errmsg(db);
-        return false;
+QSqlDatabase SaveVideoAndPictureService::createDatabaseConnection() {
+    const QString connectionName = QString("VideoAndPictureConnection_%1").arg((quintptr)QThread::currentThreadId());
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+    db.setDatabaseName("data/video.db");
+
+    if (!db.open()) {
+        qDebug() << "Can't open database:" << db.lastError().text();
+        return QSqlDatabase();
     }
-    return true;
+
+    return db;
 }
 
 bool SaveVideoAndPictureService::insertVideoInfo(const VideoDao& video) {
-    sqlite3 *db;
-    if (!openDatabase(db)) {
+    QSqlDatabase db = createDatabaseConnection();
+    if (!db.isOpen()) {
         return false;
     }
 
-    const char *sql = "INSERT INTO video (video_name, video_address, video_date, video_user, video_type, video_path) VALUES (?, ?, ?, ?, ?, ?);";
-    sqlite3_stmt *stmt;
+    // 打印即将插入的视频信息
+    qDebug() << "[DEBUG] Inserting video info:";
+    qDebug() << "Name:" << video.getVideoName();
+    qDebug() << "Address:" << video.getVideoAddress();
+    qDebug() << "Date:" << video.getVideoDate();
+    qDebug() << "User:" << video.getVideoUser();
+    qDebug() << "Type:" << video.getVideoType();
+    qDebug() << "Path:" << video.getVideoPath();
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        qDebug() << "Failed to prepare statement:" << sqlite3_errmsg(db);
-        sqlite3_close(db);
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO video (video_name, video_address, video_date, video_user, video_type, video_path) "
+                  "VALUES (:name, :address, :date, :user, :type, :path)");
+
+    query.bindValue(":name", video.getVideoName());
+    query.bindValue(":address", video.getVideoAddress());
+    query.bindValue(":date", video.getVideoDate());
+    query.bindValue(":user", video.getVideoUser());
+    query.bindValue(":type", video.getVideoType());
+    query.bindValue(":path", video.getVideoPath());
+
+    if (!query.exec()) {
+        qDebug() << "Failed to insert video:" << query.lastError().text();
+        db.close();  // 关闭数据库连接
         return false;
     }
 
-    
-    sqlite3_bind_text(stmt, 1, video.getVideoName().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, video.getVideoAddress().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, video.getVideoDate().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, video.getVideoUser().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 5, video.getVideoType());
-    sqlite3_bind_text(stmt, 6, video.getVideoPath().toUtf8().constData(), -1, SQLITE_STATIC);
-
-    
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        qDebug() << "Failed to insert video:" << sqlite3_errmsg(db);
-        sqlite3_finalize(stmt);
-        sqlite3_close(db);
-        return false;
-    }
-
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    db.close();  // 关闭数据库连接
     return true;
 }
 
 bool SaveVideoAndPictureService::insertPictureInfo(const PictureDao& picture) {
-    sqlite3 *db;
-    if (!openDatabase(db)) {
+    QSqlDatabase db = createDatabaseConnection();
+    if (!db.isOpen()) {
         return false;
     }
 
-    const char *sql = "INSERT INTO picture (picture_name, picture_address, picture_date, picture_user, picture_type, picture_path) VALUES (?, ?, ?, ?, ?, ?);";
-    sqlite3_stmt *stmt;
+    // 打印即将插入的图片信息
+    qDebug() << "[DEBUG] Inserting picture info:";
+    qDebug() << "Name:" << picture.getPictureName();
+    qDebug() << "Address:" << picture.getPictureAddress();
+    qDebug() << "Date:" << picture.getPictureDate();
+    qDebug() << "User:" << picture.getPictureUser();
+    qDebug() << "Type:" << picture.getPictureType();
+    qDebug() << "Path:" << picture.getPicturePath();
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        qDebug() << "Failed to prepare statement:" << sqlite3_errmsg(db);
-        sqlite3_close(db);
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO picture (picture_name, picture_address, picture_date, picture_user, picture_type, picture_path) "
+                  "VALUES (:name, :address, :date, :user, :type, :path)");
+
+    query.bindValue(":name", picture.getPictureName());
+    query.bindValue(":address", picture.getPictureAddress());
+    query.bindValue(":date", picture.getPictureDate());
+    query.bindValue(":user", picture.getPictureUser());
+    query.bindValue(":type", picture.getPictureType());
+    query.bindValue(":path", picture.getPicturePath());
+
+    if (!query.exec()) {
+        qDebug() << "Failed to insert picture:" << query.lastError().text();
+        db.close();  // 关闭数据库连接
         return false;
     }
 
-    // 绑定参数
-    sqlite3_bind_text(stmt, 1, picture.getPictureName().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, picture.getPictureAddress().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, picture.getPictureDate().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, picture.getPictureUser().toUtf8().constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 5, picture.getPictureType());
-    sqlite3_bind_text(stmt, 6, picture.getPicturePath().toUtf8().constData(), -1, SQLITE_STATIC);
-
-    
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        qDebug() << "Failed to insert picture:" << sqlite3_errmsg(db);
-        sqlite3_finalize(stmt);
-        sqlite3_close(db);
-        return false;
-    }
-
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    db.close();  // 关闭数据库连接
     return true;
 }

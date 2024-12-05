@@ -1,6 +1,8 @@
 #include "logincontroller.h"
 #include <QCryptographicHash>
 #include "../common/commondefs.h"
+int LoginController::loginflag = 0; // 静态成员变量的定义和初始化
+
 LoginController::LoginController()
 {
     initController();
@@ -11,7 +13,7 @@ LoginController::~LoginController()
     qDebug() << "[DEBUG] LoginController destroyed.";
 }
 
-int LoginController::getLoginFlag() const {
+int LoginController::getLoginFlag() {
     return loginflag;
 }
 
@@ -133,6 +135,7 @@ void LoginController::finishedLoginControllerThreadSlot(const int messageflag)
             break;
         case LOGINSUCCESS:
             uiMessage = "登录成功，欢迎使用！";
+            setLoginFlag(1);
             break;
         case LOGINERROR:
             uiMessage = "登录失败，用户名或密码错误。";

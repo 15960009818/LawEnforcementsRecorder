@@ -24,11 +24,14 @@ public:
     void setUi();
     void connectSignals();
 //    void paintEvent(QPaintEvent *event) override;
-
-private slots:
+signals:
+    void pictureSelected(const PictureDao &picture);
+    void pictureClicked(const PictureDao &picture);
+public slots:
     void BtnClicked();
 
     void onFinishedPictureQuery(const QString &message, const QList<PictureDao> &pictureList);
+    void openUploadWindow(const QString &filePath);
 private:
     QGridLayout *glay;           // 网格布局
     QLabel *LabTitle;            // 标题标签

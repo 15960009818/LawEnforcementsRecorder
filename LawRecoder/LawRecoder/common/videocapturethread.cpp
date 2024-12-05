@@ -1,11 +1,11 @@
 // VideoCaptureThread.cpp
-#include "VideoCaptureThread.h"
+#include "videocapturethread.h"
 #include <QDate>
 #include <QDebug>
 #include <QDir>
 #include "../service/savevideoandpictureservice.h"
 #include "../dao/picturedao.h"
-VideoCaptureThread::VideoCaptureThread(QObject *parent) : QThread(parent), stopFlag(false) {
+VideoCaptureThread::VideoCaptureThread() {
 
     qDebug() << "VideoCaptureThread initialized.";
 
@@ -37,30 +37,37 @@ void VideoCaptureThread::stop() {
 
 void VideoCaptureThread::run() {
     QMutexLocker locker(&frameMutex);
-     // 加锁保护摄像头操作
+
+    // 加锁保护摄像头操作
     stopFlag = false;
     if (!cap.open(0)) {
         qWarning("Failed to open camera.");
         return;
     }
+
+    // 设置支持的格式
+    cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+    cap.set(cv::CAP_PROP_FPS, 30);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+
     qDebug() << "Camera opened successfully.";
 
     while (!stopFlag) {
         cv::Mat frame;
         cap >> frame;
+
         if (frame.empty()) {
             qWarning() << "Empty frame received.";
             continue;
         }
 
-        // 不加限制可能截图拿不到那一帧
         {
             QMutexLocker locker(&queueMutex);
             if (frameQueue.size() >= 50) {
                 frameQueue.dequeue(); // 丢弃最旧的帧，保持队列长度
             }
             frameQueue.enqueue(frame.clone());
-            //qDebug() << "Frame added to queue. Queue size:" << frameQueue.size();
         }
 
         // 转换颜色格式并发送帧
@@ -68,7 +75,6 @@ void VideoCaptureThread::run() {
         cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
         QImage img((uchar*)rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step, QImage::Format_RGB888);
         emit frameCaptured(img.copy());
-        //qDebug() << "Frame captured and emitted.";
     }
 
     cap.release();
@@ -76,21 +82,19 @@ void VideoCaptureThread::run() {
 }
 
 
+
 void VideoCaptureThread::captureScreenshot() {
-    // 加锁确保摄像头的独占访问
-    QMutexLocker locker(&frameMutex);
-    if (!cap.isOpened())
+    cv::Mat frame;
     {
-        qWarning("Camera not open. Attempting to reopen...");
-        if (!cap.open(0))
-        {
-            qWarning("Failed to reopen camera for screenshot.");
+        QMutexLocker locker(&queueMutex);
+        if (!frameQueue.isEmpty()) {
+            frame = frameQueue.dequeue(); // 从队列中获取最旧的帧
+        } else {
+            qWarning("Frame queue is empty, unable to capture screenshot.");
             return;
         }
     }
 
-    cv::Mat frame;
-    cap >> frame;
     if (frame.empty()) {
         qWarning("Failed to capture screenshot - empty frame.");
 
@@ -108,18 +112,15 @@ void VideoCaptureThread::captureScreenshot() {
         return;
     }
 
-    // 转换颜色格式并保存图像
-    cv::Mat rgbFrame;
-    cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
-    QImage img((uchar*)rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step, QImage::Format_RGB888);
+    // 使用 MatToQImage 进行图像转换
+    QImage img = MatToQImage(frame);
 
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
     QString picturePath = Singleton<DeviceService>::getInstance().getPicturePath();
 
-    // 检查 picturePath 是否为空，如果为空则使用默认路径
     if (picturePath.isEmpty()) {
-        picturePath = QDir::homePath() + "/Pictures"; // 默认保存路径，例如用户主目录下的 Pictures 文件夹
-        QDir().mkpath(picturePath); // 如果目录不存在则创建
+        picturePath = QDir::homePath() + "/Pictures";
+        QDir().mkpath(picturePath);
     }
 
     QString outfile = QDir::cleanPath(picturePath + "/" + timestamp + ".jpg");
@@ -127,7 +128,6 @@ void VideoCaptureThread::captureScreenshot() {
     if (img.save(outfile, "JPEG")) {
         qDebug() << "Screenshot saved at:" << outfile;
 
-        // 成功保存截图，准备 PictureDao 对象并写入数据库
         PictureDao picture;
         picture.setPictureName(timestamp);
         picture.setPictureAddress("null");
@@ -137,12 +137,43 @@ void VideoCaptureThread::captureScreenshot() {
         picture.setPicturePath(outfile);
 
         SaveVideoAndPictureService service;
-        bool insertPicture =  service.insertPictureInfo(picture);
-        if(!insertPicture)
-        {
-            qDebug()<<"[ERROR] insert picture error";
-        }
+        service.insertPictureInfo(picture);
     } else {
         qDebug() << "Failed to save screenshot.";
     }
+}
+
+
+QImage VideoCaptureThread::MatToQImage(const cv::Mat &mat) {
+    switch (mat.type()) {
+    case CV_8UC1: {
+        QImage image(mat.cols, mat.rows, QImage::Format_Indexed8);
+        image.setColorCount(256);
+        for(int i = 0; i < 256; i++) {
+            image.setColor(i, qRgb(i, i, i));
+        }
+
+        uchar *pSrc = mat.data;
+        for(int row = 0; row < mat.rows; row++) {
+            uchar *pDest = image.scanLine(row);
+            memcpy(pDest, pSrc, mat.cols);
+            pSrc += mat.step;
+        }
+        return image;
+    }
+    case CV_8UC3: {
+        const uchar *pSrc = (const uchar*)mat.data;
+        QImage image(pSrc, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+        return image.rgbSwapped();  // OpenCV 的 BGR 转为 RGB
+    }
+    case CV_8UC4: {
+        const uchar *pSrc = (const uchar*)mat.data;
+        QImage image(pSrc, mat.cols, mat.rows, mat.step, QImage::Format_ARGB32);
+        return image.copy();
+    }
+    default:
+        qWarning() << "Unsupported image format for Mat to QImage conversion.";
+        break;
+    }
+    return QImage();
 }

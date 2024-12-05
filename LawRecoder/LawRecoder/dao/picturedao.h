@@ -3,7 +3,7 @@
 
 #include<QString>
 #include<QObject>
-
+#include <QMetaType>
 class PictureDao
 {
 
@@ -47,6 +47,7 @@ public:
                picture_path == other.picture_path;
     }
 
+
 private:
     int picture_id;
     QString picture_name;
@@ -56,7 +57,7 @@ private:
     int picture_type;
     QString picture_path;
 };
-
+Q_DECLARE_METATYPE(PictureDao)
 
 
 #endif // PICTURE_H

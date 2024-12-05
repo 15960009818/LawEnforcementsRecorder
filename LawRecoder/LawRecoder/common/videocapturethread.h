@@ -9,16 +9,18 @@
 #include <opencv2/opencv.hpp>
 #include <QQueue>
 #include "../service/deviceservice.h"
+#include "../service/savevideoandpictureservice.h"
+#include "../common/singleton.h"
 class VideoCaptureThread : public QThread {
     Q_OBJECT
-
+    SINGLETON(VideoCaptureThread);
 public:
-    VideoCaptureThread(QObject *parent = nullptr);
-    ~VideoCaptureThread();
+
      void captureScreenshot();
     void startCapturing();
     void stop();  // 添加停止方法
 
+    QImage MatToQImage(const cv::Mat &mat);
 signals:
     void frameCaptured(const QImage &image);
     void finished();  // 新增停止信号
@@ -35,7 +37,7 @@ private:
     QMutex queueMutex;
     QWaitCondition frameAvailable;
     cv::Mat frame;
-
+    SaveVideoAndPictureService *saveVideoAndPictureService;
 
 };
 

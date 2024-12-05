@@ -12,8 +12,9 @@
 #include <QDebug>
 #include <QAction>
 #include "../dao/videodao.h"
+#include "videoplayer.h"
 #include "../controller/videocapturecontroller.h"
-
+#include "../filetranswin.h"
 class VideoCaptureWin : public QWidget {
     Q_OBJECT
 signals:
@@ -29,7 +30,7 @@ private:
 private slots:
     void onFinishedVideoQuery(const QString &message, const QList<VideoDao> &videoList); // 查询视频完成的处理函数
     void BtnClicked(); // 按钮点击处理函数
-
+    void openUploadWindow(const QString &filePath);
 private:
     QGridLayout *glay;            // 网格布局
     QLabel *LabTitle;              // 标题标签
@@ -48,7 +49,11 @@ private:
     QPushButton *BtnReturnList;    // 返回视频列表按钮
     QDate selectedDate;            // 选择的日期
     int page = 1;                  // 当前页面
+    VideoPlayer *videoPlayer;
     QAction *ActReturn;            // 返回按钮的动作
+    QPushButton *BtnUpload;  // 上传按钮
+    FileTransWin * transWin;
+
 };
 
 #endif // VIDEOCAPTUREWIN_H

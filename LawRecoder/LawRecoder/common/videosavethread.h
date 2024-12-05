@@ -7,12 +7,12 @@
 #include <opencv2/opencv.hpp>
 #include "../service/deviceservice.h"
 #include "../service/savevideoandpictureservice.h"
+#include "../common/singleton.h"
 class VideoSaveThread : public QThread {
     Q_OBJECT
-
+     SINGLETON(VideoSaveThread)
 public:
-    VideoSaveThread(QObject *parent = nullptr);
-    ~VideoSaveThread();
+
     void startSaving(const QString &filename, int width, int height, int fps);
     void stop();  // 添加停止方法
 

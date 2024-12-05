@@ -2,7 +2,7 @@
 #define IMAGECAPTURESERVICE_H
 
 #include <QObject>
-#include <QDebug>
+#include <QDate>
 #include <QList>
 #include "../dao/picturedao.h"
 
@@ -13,11 +13,15 @@ public:
     explicit ImageCaptureService(QObject *parent = nullptr);
 
 public slots:
-    void GetDateImageSlots(const QDate &date, const int &Page);
+    // 查询指定日期的图片信息，分页显示，每页4条记录
+    void GetDateImageSlots(const QDate &date, const int &page);
 
 signals:
-    void imageListReady(const QList<PictureDao> &pictureList); // 图片列表准备好时发出的信号
-    void errorOccurred(int errorCode); // 错误发生时发出的信号
+    // 图片列表准备好时发出的信号，传递查询结果
+    void imageListReady(const QList<PictureDao> &pictureList);
+
+    // 发生错误时发出的信号，传递错误代码
+    void errorOccurred(int errorCode);
 };
 
 #endif // IMAGECAPTURESERVICE_H
