@@ -19,8 +19,8 @@ SettingWin::~SettingWin()
 void SettingWin::setUi()
 {
     // 固定窗口大小，设置窗口标题
-    this->setMaximumSize(400, 600);
-    this->setMinimumSize(400, 600);
+//    this->setMaximumSize(400, 600);
+//    this->setMinimumSize(400, 600);
     this->setWindowTitle("系统设置");
 
     // 初始化控件

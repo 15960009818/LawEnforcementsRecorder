@@ -13,7 +13,7 @@ LoginWin::LoginWin(QWidget *parent)
  * @brief LoginWin::setUi 登录页面
  */
 void LoginWin::setUi() {
-    this->setFixedSize(400, 600);
+//    this->setFixedSize(400, 600);
     this->setWindowTitle("登录界面");
 
     labTitle = new QLabel("登录界面", this);

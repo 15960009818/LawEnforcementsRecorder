@@ -14,6 +14,7 @@
 #include "settingwin.h"
 #include "videocapturewin.h"
 #include "imagecapturewin.h"
+#include "common/capture/gstreamercap.h"
 // 前向声明
 class CameraCapture;
 
@@ -61,7 +62,10 @@ private:
     void captureScreenshot();
      static IndexWin *instance;
      explicit IndexWin(QWidget *parent = nullptr);
-      ~IndexWin();
+     //FrameProcessingTask *frameProcessingTask;
+     ~IndexWin();
+     bool isArmDevice();
+     GStreamerCap *gstCap;
 public:
 
 

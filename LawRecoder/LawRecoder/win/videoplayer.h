@@ -26,6 +26,10 @@ public slots:
     void finishedPlaying();
     void changeSpeed(int index);
 
+protected:
+protected:
+    void closeEvent(QCloseEvent *event) override;  // 重载关闭事件
+
 private:
     QLabel *videoLabel;
     QPushButton *playButton;

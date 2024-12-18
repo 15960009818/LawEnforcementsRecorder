@@ -7,7 +7,8 @@
 #include <QImage>
 #include <QPixmap>
 #include <QDebug>
-
+#include <QCloseEvent>
+#include <QMessageBox>
 /**
  * @brief VideoPlayer 构造函数
  *
@@ -25,6 +26,7 @@ VideoPlayer::VideoPlayer(const QString &videoPath, QWidget *parent)
     if (!videoThread->isOpened())
     {
         qDebug() << "Error opening video!";
+        QMessageBox::critical(this, tr("Error"), tr("The video file is corrupted or cannot be opened."));
         return;
     }
 
@@ -48,7 +50,7 @@ VideoPlayer::VideoPlayer(const QString &videoPath, QWidget *parent)
     speedComboBox->addItem("0.5x");
 
     // 添加截图按钮
-    screenshotButton = new QPushButton("Screenshot", this);
+    //screenshotButton = new QPushButton("Screenshot", this);
 
     // 设置界面布局
     QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -56,7 +58,7 @@ VideoPlayer::VideoPlayer(const QString &videoPath, QWidget *parent)
     controlLayout->addWidget(playButton);
     controlLayout->addWidget(slider);
     controlLayout->addWidget(speedComboBox);
-    controlLayout->addWidget(screenshotButton);
+    //controlLayout->addWidget(screenshotButton);
 
     mainLayout->addWidget(videoLabel);
     mainLayout->addLayout(controlLayout);
@@ -87,10 +89,15 @@ VideoPlayer::VideoPlayer(const QString &videoPath, QWidget *parent)
  */
 VideoPlayer::~VideoPlayer()
 {
-    videoThread->stop();  // 停止视频线程
-    videoThread->wait();  // 等待视频线程结束
-    delete videoThread;   // 删除视频线程对象
+    QCloseEvent event;
+    closeEvent(&event);
+
+    // 确保资源释放完成
+    videoThread->stop();
+    videoThread->wait();
+    delete videoThread;
 }
+
 
 /**
  * @brief 播放/暂停按钮的槽函数
@@ -192,4 +199,20 @@ void VideoPlayer::changeSpeed(int index)
 void VideoPlayer::onScreenshotButtonClicked()
 {
     videoThread->screenshotRequested = true;  // 截图请求
+}
+/**
+ * @brief 窗口关闭事件
+ *
+ * 当窗口关闭时，停止视频播放并销毁视频线程。
+ *
+ * @param event 关闭事件
+ */
+void VideoPlayer::closeEvent(QCloseEvent *event)
+{
+    if (isPlaying)
+    {
+        videoThread->stop();  // 停止视频播放线程
+        videoThread->wait();  // 等待线程完成
+    }
+    event->accept();  // 接受关闭事件
 }

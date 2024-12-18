@@ -17,6 +17,7 @@ public:
     void stop();  // 添加停止方法
 
     void stopSaving();
+    void insertVideoInfoToDatabase();
 public slots:
     void saveFrame(const QImage &image);
 

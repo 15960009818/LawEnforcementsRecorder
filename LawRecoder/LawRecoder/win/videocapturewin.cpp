@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QMimeDatabase>
 #include <QProgressDialog>
+#include <QTimer>
 VideoCaptureWin::VideoCaptureWin(QWidget *parent)
 {
     setUi();            // 设置UI界面
@@ -28,8 +29,8 @@ VideoCaptureWin::VideoCaptureWin(QWidget *parent)
 
 void VideoCaptureWin::setUi()
 {
-    this->setMaximumSize(400, 600);
-    this->setMinimumSize(400, 600);
+//    this->setMaximumSize(400, 600);
+//    this->setMinimumSize(400, 600);
     this->setWindowTitle("视频选择界面");
 
     glay = new QGridLayout(this);
@@ -163,17 +164,54 @@ void VideoCaptureWin::onFinishedVideoQuery(const QString &message, const QList<V
             // 将视频路径存储在 QListWidgetItem 的数据中
             item->setData(Qt::UserRole, video.getVideoPath());
         }
+        // 防抖逻辑：限制快速点击
+                QTimer *debounceTimer = new QTimer(this);
+                debounceTimer->setSingleShot(true);
+                // 在信号连接前断开所有旧的连接
+                disconnect(videowins, &QListWidget::itemClicked, nullptr, nullptr);
+                // 连接信号以选择视频
+                connect(videowins, &QListWidget::itemClicked, [this, debounceTimer](QListWidgetItem *item) {
+                    if (debounceTimer->isActive()) {
+                        qDebug() << "Click ignored due to debounce timer.";
+                        return; // 忽略快速连续点击
+                    }
 
-        // 连接信号以选择视频
-        connect(videowins, &QListWidget::itemClicked, [this](QListWidgetItem *item) {
-            QString videoPath = item->data(Qt::UserRole).toString();
+                    debounceTimer->start(500); // 500ms 的防抖时间
+                    QString videoPath = item->data(Qt::UserRole).toString();
 
-            videoPlayer = new VideoPlayer(videoPath);
-            videoPlayer->playPause();
-            videoPlayer->show();
+                    try {
+                        if (videoPath.isEmpty() || !QFile::exists(videoPath)) {
+                            throw std::runtime_error("Video file not found or path invalid.");
+                        }
 
-            qDebug() << "Selected video path:" << videoPath;
-        });
+                        videoPlayer = new VideoPlayer(videoPath);
+
+                        //videoPlayer->playPause(); // 调用可能会抛出异常
+                        videoPlayer->show();
+
+                        qDebug() << "Selected video path:" << videoPath;
+                    } catch (const std::exception &e) {
+                        qDebug() << "Error occurred while playing video:" << e.what();
+
+                        if (videoPlayer) {
+                            delete videoPlayer; // 确保释放资源
+                            videoPlayer = nullptr;
+                        }
+
+                        // 显示错误信息给用户
+                        QMessageBox::critical(this, "Error", QString("Failed to play video: %1").arg(e.what()));
+                    } catch (...) {
+                        qDebug() << "Unknown error occurred while playing video.";
+
+                        if (videoPlayer) {
+                            delete videoPlayer;
+                            videoPlayer = nullptr;
+                        }
+
+                        QMessageBox::critical(this, "Error", "An unknown error occurred.");
+                    }
+                });
+
 
     } else if (message.contains("查询失败")) {
         QMessageBox::warning(this, "Query Error", message);

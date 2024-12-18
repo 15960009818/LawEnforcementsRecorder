@@ -4,6 +4,7 @@
 #include "../common/singleton.h"
 #include "../controller/imagecapturecontroller.h"
 #include <QMessageBox>
+#include <QTransform>
 ImageCaptureWin::ImageCaptureWin(QWidget *parent)
     : QWidget(parent) // 确保调用父类构造函数
 {
@@ -66,9 +67,6 @@ void ImageCaptureWin::setUi()
         editdatetime->setDisplayFormat("yyyy/MM/dd");
         editdatetime->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-
-
-
         videowins = new QListWidget();
         videowins->setViewMode(QListView::IconMode);
         videowins->setMovement(QListView::Static);
@@ -99,6 +97,11 @@ void ImageCaptureWin::setUi()
         glay->addWidget(LabptPathS, 9, 1, 1, 1);
         glay->addWidget(BtnMore, 10, 1, 1, 2); // 添加查看更多按钮
          glay->addWidget(BtnReturnList, 10, 1, 1, 2);
+
+//         // 旋转界面90度
+//        QTransform transform;
+//        transform.rotate(90);
+//        this->setTrans (transform);
 }
 
 void ImageCaptureWin::connectSignals()
